@@ -1,0 +1,47 @@
+services:
+  gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gateway
+    working_dir: /app
+    command: node dist/apps/gateway/main.js # ✅ 바로 실행
+    ports:
+      - '3000:3000'
+    depends_on:
+      - auth
+      - event
+
+  auth:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: auth
+    working_dir: /app
+    command: node dist/apps/auth/main.js # ✅ 바로 실행
+    ports:
+      - '3001:3001'
+    depends_on:
+      - mongodb
+
+  event:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: event
+    working_dir: /app
+    command: node dist/apps/event/main.js # ✅ 바로 실행
+    ports:
+      - '3002:3002'
+
+  mongodb:
+    image: mongo
+    container_name: mongodb
+    restart: always
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongodb_data:/data/db
+
+volumes:
+  mongodb_data:
