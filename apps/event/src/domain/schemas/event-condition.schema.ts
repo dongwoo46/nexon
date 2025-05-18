@@ -17,8 +17,8 @@ export class EventCondition {
   operator: ConditionOperatorType;
 
   // 비교값
-  @Prop({ required: true })
-  value: number | string;
+  @Prop({ type: MongooseSchema.Types.Mixed, required: true }) //명시적 타입 지정
+  value: string | number;
 
   // 조건에 대상이 필요한 경우
   @Prop()

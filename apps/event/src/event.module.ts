@@ -8,10 +8,16 @@ import { ItemService } from './application/item.service';
 import { RewardRequestService } from './application/reward-request.service';
 import { RewardService } from './application/reward.service';
 import { RewardRequestLogService } from './application/reward-request-log.service';
+import { EventCondition, EventConditionSchema } from './domain/schemas/event-condition.schema';
+import { Item, ItemSchema } from './domain/schemas/item.schema';
 
 @Module({
   imports: [
     MongooseModule.forRoot('mongodb://mongodb:27017/maple', { dbName: 'maple', ssl: false }),
+    MongooseModule.forFeature([
+      { name: EventCondition.name, schema: EventConditionSchema },
+      { name: Item.name, schema: ItemSchema },
+    ]),
     ConfigModule.forRoot({
       isGlobal: true,
     }),

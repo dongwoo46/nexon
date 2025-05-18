@@ -11,10 +11,7 @@ import { RoleType } from '@libs/constants/role.constant';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
-  constructor(
-    private reflector: Reflector,
-    // private readonly userService: UserService, // UsersService를 주입받습니다.
-  ) {}
+  constructor(private reflector: Reflector) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const requiredRoles = this.reflector.getAllAndOverride<RoleType[]>(ROLE_KEY, [

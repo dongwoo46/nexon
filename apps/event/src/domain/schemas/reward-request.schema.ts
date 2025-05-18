@@ -1,6 +1,6 @@
+import { RewardStatusType } from '@libs/constants';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, HydratedDocument, Schema as MongooseSchema, Types } from 'mongoose';
-import { RewardStatusType } from '../../../../../libs/constants/reward-status.type';
+import { HydratedDocument, Schema as MongooseSchema, Types } from 'mongoose';
 
 export type RewardRequestDocument = HydratedDocument<RewardRequest>;
 

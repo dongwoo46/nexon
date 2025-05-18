@@ -1,4 +1,10 @@
-import { Injectable, BadRequestException, HttpStatus, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  HttpStatus,
+  ForbiddenException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument } from '../domain/schemas/user.schema';
@@ -26,7 +32,7 @@ export class UserService {
     try {
       const exists = await this.userModel.findOne({ email: dto.email }).session(session);
       if (exists) {
-        throw new RpcException(new BadRequestException('이미 존재하는 이메일입니다.'));
+        throw new RpcException(new ConflictException('이미 존재하는 이메일입니다.'));
       }
 
       // 관리자 권한 제한

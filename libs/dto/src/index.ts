@@ -4,3 +4,4 @@ export * from './auth/request/login-req.dto';
 export * from './auth/response/login-res.dto';
 export * from './event/request/create-event-condtion-req.dto';
 export * from './event/response/response.dto';
+export * from './event/request/create-item.dto';
