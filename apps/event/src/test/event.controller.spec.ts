@@ -3,7 +3,7 @@ import { EventService } from '../application/event.service';
 import { EventController } from '../interfaces/controllers/event.controller';
 
 describe('EventController', () => {
-  let eventController: EventC\ontroller;
+  let eventController: EventController;
 
   beforeEach(async () => {
     const app: TestingModule = await Test.createTestingModule({

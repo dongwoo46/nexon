@@ -14,7 +14,6 @@ export class UserController {
     try {
       return await this.userService.createUser(dto);
     } catch (err) {
-      console.error('🔥 Auth 내부 에러 발생:', err);
       throw err;
     }
   }
