@@ -1,9 +1,9 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, HydratedDocument, Schema as MongooseSchema, Types } from 'mongoose';
-import { RoleType } from '../types/role.type';
+import { HydratedDocument, Schema as MongooseSchema, Types } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import { SignUpReqDto } from '@libs/dto';
-import { UserStatusType } from '../types/user-status.type';
+import { RoleType } from '@libs/constants/role.constant';
+import { UserStatusType } from '@libs/constants/user-status.constant';
 
 export type UserDocument = HydratedDocument<User>;
 

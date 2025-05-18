@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, HydratedDocument, Schema as MongooseSchema, Types } from 'mongoose';
-import { EventType } from '../types/event.type';
-import { EventStatus } from '../types/event-status.type';
+import { EventType } from '../../../../../libs/constants/event.constant';
+import { EventStatus } from '../../../../../libs/constants/event-status.constant';
 
 export type EventDocument = HydratedDocument<Event>;
 

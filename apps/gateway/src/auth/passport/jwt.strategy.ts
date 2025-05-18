@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
-import { RoleType } from 'apps/auth/src/domain/types/role.type';
+import { RoleType } from '@libs/constants/role.constant';
 import { RpcException } from '@nestjs/microservices';
 
 export interface JwtPayload {

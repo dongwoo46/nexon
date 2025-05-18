@@ -9,7 +9,7 @@ import {
   IsNotEmpty,
   IsMongoId,
 } from 'class-validator';
-import { RoleType } from '../../../../../apps/auth/src/domain/types/role.type';
+import { RoleType } from '../../../../constants/role.constant';
 
 export class SignUpReqDto {
   @IsEmail()

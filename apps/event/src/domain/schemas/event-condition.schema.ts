@@ -1,7 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, HydratedDocument, Schema as MongooseSchema, Types } from 'mongoose';
-import { ConditionType } from '../types/condition.type';
-import { ConditionOperatorType } from '../types/condtion-operator.type';
+import { ConditionType } from '../../../../../libs/constants/condition.constant';
+import { ConditionOperatorType } from '../../../../../libs/constants/condtion-operator.constant';
+import { CreateEventConditionReqDto } from '@libs/dto';
 
 export type EventConditionDocument = HydratedDocument<EventCondition>;
 
@@ -30,6 +31,17 @@ export class EventCondition {
   // 설명
   @Prop()
   description?: string;
+
+  static createEventCondition(dto: CreateEventConditionReqDto): Partial<EventCondition> {
+    return {
+      type: dto.type,
+      operator: dto.operator,
+      value: dto.value,
+      itemKey: dto.itemKey,
+      category: dto.category,
+      description: dto.description,
+    };
+  }
 }
 
 export const EventConditionSchema = SchemaFactory.createForClass(EventCondition);
