@@ -3,5 +3,5 @@ export const UserMessagePatternConst = {
   USER_LOGIN: 'user.login',
 } as const;
 
-export type UserMessagePatternKey = keyof typeof UserMessagePatternConst;
-export type UserMessagePatternValue = (typeof UserMessagePatternConst)[UserMessagePatternKey];
+export type UserMessagePattern =
+  (typeof UserMessagePatternConst)[keyof typeof UserMessagePatternConst];

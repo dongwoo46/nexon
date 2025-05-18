@@ -25,17 +25,13 @@ export class User {
   @Prop({ default: 'active', type: String })
   status: UserStatusType;
 
-  // 누적 출석 횟수 (기본 출석 이벤트)
-  @Prop({ default: 0 })
-  attendanceCount: number;
+  // 출석 날짜
+  @Prop({ type: [String], default: [] }) // 형식: YYYY-MM-DD
+  attendanceDates: string[];
 
   // 연속 출석 횟수
   @Prop({ default: 0 })
   continuousAttendanceCount: number;
-
-  // 마지막 출석 날짜 (연속 출석 판단)
-  @Prop({ default: null })
-  lastAttendanceDate: Date;
 
   // 현재 보유 포인트 (뽑기, 보상 구매)
   @Prop({ default: 0 })
@@ -45,13 +41,13 @@ export class User {
   @Prop({ default: 0 })
   usedPoints: number;
 
-  // 총 로그인 횟수 (누적 로그인 이벤트, 통계)
+  // 초대 친구 수
   @Prop({ default: 0 })
-  loginCount: number;
+  inviteCount: number;
 
-  // 마지막 로그인 일시 (출석 이벤트 중복 방지 )
-  @Prop({ default: null })
-  lastLoginAt: Date;
+  // 초대한 친구
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User', default: null })
+  invitedBy?: Types.ObjectId;
 
   // 받은 보상 ID 배열
   @Prop({
@@ -72,13 +68,10 @@ export class User {
       password: hashedPassword,
       role: dto.role ?? 'USER',
       status: 'active',
-      attendanceCount: 0,
+      attendanceDates: undefined,
       continuousAttendanceCount: 0,
-      lastAttendanceDate: undefined,
       points: 0,
       usedPoints: 0,
-      loginCount: 0,
-      lastLoginAt: undefined,
       receivedRewards: [],
     };
   }

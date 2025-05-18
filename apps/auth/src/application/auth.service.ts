@@ -9,6 +9,7 @@ import { RpcException } from '@nestjs/microservices';
 import { ConfigService } from '@nestjs/config';
 import { UserStatus } from '../domain/types/user-status.type';
 import { v4 as uuidv4 } from 'uuid';
+import * as dayjs from 'dayjs';
 
 @Injectable()
 export class AuthService {
@@ -37,6 +38,39 @@ export class AuthService {
       throw new RpcException(new UnauthorizedException('비밀번호가 올바르지 않습니다.'));
     }
 
+    // === 출석정보 비즈니스 로직 ===
+    // USER만 출석 정보 업데이트 ADMIN, OPERATOR, AUDITOR 출석 정보 업데이트X
+    if (user.role === 'USER') {
+      const now = new Date();
+      const today = dayjs(now).format('YYYY-MM-DD');
+      const yesterday = dayjs(now).subtract(1, 'day').format('YYYY-MM-DD');
+      const sortedAttendanceDate = [...user.attendanceDates].sort(); // 시간순 정렬
+      const lastAttendance = sortedAttendanceDate.at(-1);
+
+      // 오늘 출석 기록이 없으면 → 출석 인정
+      if (!user.attendanceDates.includes(today)) {
+        user.attendanceDates.push(today);
+
+        // 연속 출석 판정
+        if (lastAttendance === yesterday) {
+          user.continuousAttendanceCount += 1;
+        } else {
+          user.continuousAttendanceCount = 1;
+        }
+
+        // 포인트 지급
+        user.points += 10;
+
+        // 연속 출석이 7의 배수라면 추가 포인트
+        if (user.continuousAttendanceCount > 0 && user.continuousAttendanceCount % 7 === 0) {
+          user.points += 20;
+        }
+      }
+    }
+
+    await user.save();
+
+    // === jwt 발급 ===
     const payload = {
       sub: user._id.toString(),
       email: user.email,

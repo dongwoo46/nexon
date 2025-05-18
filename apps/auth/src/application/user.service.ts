@@ -51,6 +51,19 @@ export class UserService {
     }
 
     const newUser = await User.signUpUser(dto);
+    if (dto.inviteCode) {
+      const inviter = await this.userModel.findById(dto.inviteCode);
+      if (!inviter) {
+        throw new RpcException(new BadRequestException('유효하지 않은 초대 코드입니다.'));
+      }
+
+      // 새로운 회원 초대자의 id로 매핑
+      newUser.invitedBy = inviter._id;
+
+      // 초대한 회원의 inviteCount 증가
+      await this.userModel.updateOne({ _id: inviter._id }, { $inc: { inviteCount: 1 } });
+    }
+
     const createdUser = new this.userModel(newUser);
     await createdUser.save();
 

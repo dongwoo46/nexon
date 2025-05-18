@@ -7,6 +7,7 @@ import {
   Matches,
   ValidateIf,
   IsNotEmpty,
+  IsMongoId,
 } from 'class-validator';
 import { RoleType } from '../../../../../apps/auth/src/domain/types/role.type';
 
@@ -35,4 +36,9 @@ export class SignUpReqDto {
   @IsString()
   @IsNotEmpty({ message: '고급 권한 등록을 위해 비밀키가 필요합니다.' })
   secretKey?: string;
+
+  // 초대자 ID
+  @IsOptional()
+  @IsMongoId()
+  inviteCode?: string;
 }
