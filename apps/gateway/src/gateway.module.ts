@@ -6,7 +6,7 @@ import { APP_FILTER, APP_GUARD, APP_PIPE } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/passport/jwt-auth.guard';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { ConfigModule } from '@nestjs/config';
-import { RolesGuard } from './auth/passport/roles.guard';
+import { RolesGuard } from './common/guards/roles.guard';
 
 @Module({
   imports: [

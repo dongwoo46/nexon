@@ -6,9 +6,4 @@ import { EventMessagePatternConst } from '@libs/constants/event-message-pattern.
 @Controller()
 export class EventController {
   constructor(private readonly eventService: EventService) {}
-
-  @MessagePattern(EventMessagePatternConst.USER_LOGIN)
-  getHello(): string {
-    return this.eventService.getHello();
-  }
 }

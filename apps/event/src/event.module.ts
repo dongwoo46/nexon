@@ -4,10 +4,10 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
 import { EventController } from './interfaces/controllers/event.controller';
 import { EventConditionService } from './application/event-condition.service';
-import { EventLogService } from './application/event-log.service';
 import { ItemService } from './application/item.service';
 import { RewardRequestService } from './application/reward-request.service';
 import { RewardService } from './application/reward.service';
+import { RewardRequestLogService } from './application/reward-request-log.service';
 
 @Module({
   imports: [
@@ -20,7 +20,7 @@ import { RewardService } from './application/reward.service';
   providers: [
     EventService,
     EventConditionService,
-    EventLogService,
+    RewardRequestLogService,
     ItemService,
     RewardRequestService,
     RewardService,

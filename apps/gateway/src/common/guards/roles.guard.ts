@@ -6,7 +6,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { ROLE_KEY } from '../../common/decorators/role.decorator';
+import { ROLE_KEY } from '../decorators/role.decorator';
 import { RoleType } from '@libs/constants/role.constant';
 
 @Injectable()
@@ -21,12 +21,20 @@ export class RolesGuard implements CanActivate {
       context.getHandler(),
       context.getClass(),
     ]);
+
+    // 역할 제한 없을 시 통과
     if (!requiredRoles) {
       return true;
     }
+
     const { user } = context.switchToHttp().getRequest();
     if (!user) {
       throw new ForbiddenException('로그인이 필요합니다.');
+    }
+
+    // ADMIN이면 무조건 통과(모든 기능 사용)
+    if (user.role === 'ADMIN') {
+      return true;
     }
 
     const hasRole = requiredRoles.some((role) => user.role === role);
