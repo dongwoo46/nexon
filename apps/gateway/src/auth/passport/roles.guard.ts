@@ -1,7 +1,13 @@
-import { Injectable, CanActivate, ExecutionContext, Inject } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  Inject,
+  ForbiddenException,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { RoleType } from '../../domain/types/role.type';
-import { ROLE_KEY } from '../decorators/role.decorator';
+import { ROLE_KEY } from '../../common/decorators/role.decorator';
+import { RoleType } from 'apps/auth/src/domain/types/role.type';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -20,17 +26,12 @@ export class RolesGuard implements CanActivate {
     }
     const { user } = context.switchToHttp().getRequest();
     if (!user) {
-      return false;
+      throw new ForbiddenException('로그인이 필요합니다.');
     }
-
-    // const nowUser = await this.membersService.findOneByEmail(user.email);
-    // if (!nowUser) {
-    //   return false;
-    // }
 
     const hasRole = requiredRoles.some((role) => user.role === role);
     if (!hasRole) {
-      return false;
+      throw new ForbiddenException('접근 권한이 없습니다.');
     }
     return hasRole;
   }

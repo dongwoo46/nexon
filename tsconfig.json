@@ -19,8 +19,9 @@
     "noFallthroughCasesInSwitch": false,
     "paths": {
       "@libs/dto": ["libs/dto/src"],
+      "@libs/dto/*": ["libs/dto/src/*"],
       "@libs/constants": ["libs/constants"],
-      "@libs/dto/*": ["libs/dto/src/*"]
+      "@libs/constants/*": ["libs/constants/*"]
     }
   }
 }

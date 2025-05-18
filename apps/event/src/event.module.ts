@@ -6,7 +6,7 @@ import { EventController } from './interfaces/controllers/event.controller';
 
 @Module({
   imports: [
-    MongooseModule.forRoot('mongodb://localhost:27017/maple', { dbName: 'maple', ssl: false }),
+    MongooseModule.forRoot('mongodb://mongodb:27017/maple', { dbName: 'maple', ssl: false }),
     ConfigModule.forRoot({
       isGlobal: true,
     }),

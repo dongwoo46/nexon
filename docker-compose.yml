@@ -32,6 +32,8 @@ services:
     command: node dist/apps/event/main.js
     ports:
       - '3002:3002'
+    depends_on:
+      - mongodb
 
   mongodb:
     image: mongo

@@ -1,10 +1,11 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Schema as MongooseSchema, Types } from 'mongoose';
+import { Document, HydratedDocument, Schema as MongooseSchema, Types } from 'mongoose';
 import { RoleType } from '../types/role.type';
 import * as bcrypt from 'bcrypt';
 import { SignUpReqDto } from '@libs/dto';
+import { UserStatusType } from '../types/user-status.type';
 
-export type UserDocument = User & Document;
+export type UserDocument = HydratedDocument<User>;
 
 @Schema({ timestamps: true })
 export class User {
@@ -16,13 +17,13 @@ export class User {
   @Prop({ required: true })
   password: string;
 
-  // admin: 관리자 / operator: 운영자 / auditor: 감사자 / member: 일반 유저
+  // admin: 관리자 / operator: 운영자 / auditor: 감사자 / user: 일반 유저
   @Prop({ default: 'USER', type: String })
   role: RoleType;
 
   // 유저 상태 관리
-  @Prop({ default: 'active' })
-  status: 'active' | 'banned' | 'inactive';
+  @Prop({ default: 'active', type: String })
+  status: UserStatusType;
 
   // 누적 출석 횟수 (기본 출석 이벤트)
   @Prop({ default: 0 })

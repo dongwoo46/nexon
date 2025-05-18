@@ -1,25 +1,16 @@
 import { NestFactory } from '@nestjs/core';
 import { GatewayModule } from './gateway.module';
-import { ValidationPipe } from '@nestjs/common';
-import { GlobalHttpExceptionFilter } from './common/filters/http-exception.filter';
+import { Logger } from '@nestjs/common';
 
 async function bootstrap() {
-  const app = await NestFactory.create(GatewayModule);
+  const app = await NestFactory.create(GatewayModule, {
+    logger: ['log', 'error', 'warn', 'debug', 'verbose'],
+  });
 
   // api 프리픽스 추가
   app.setGlobalPrefix('api');
 
-  // 유효성 검증 파이프
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transform: true,
-    }),
-  );
-
-  app.useGlobalFilters(new GlobalHttpExceptionFilter());
-
   await app.listen(3000);
+  Logger.log('Gateway is running on');
 }
 bootstrap();

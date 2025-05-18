@@ -12,7 +12,8 @@ import { UserService } from './application/user.service';
   imports: [
     MongooseModule.forRoot(
       // mongodb://username:password@ip:port/dbname
-      'mongodb://localhost:27017/maple',
+      'mongodb://mongodb:27017/maple',
+      // 'mongodb://localhost:27017/maple',
       { dbName: 'maple', ssl: false },
     ),
     ConfigModule.forRoot({
@@ -20,6 +21,7 @@ import { UserService } from './application/user.service';
     }),
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     JwtModule.registerAsync({
+      imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),

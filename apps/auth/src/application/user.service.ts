@@ -23,13 +23,12 @@ export class UserService {
     }
 
     if (dto.password !== dto.confirmPassword) {
-      throw new BadRequestException('비밀번호가 일치하지 않습니다.');
+      throw new RpcException(new BadRequestException('비밀번호가 일치하지 않습니다.'));
     }
 
     const newUser = await User.signUpUser(dto);
     const createdUser = new this.userModel(newUser);
     await createdUser.save();
-
     return {
       statusCode: HttpStatus.CREATED,
       message: '회원가입이 완료되었습니다.',
