@@ -1,4 +1,13 @@
-import { IsEmail, IsString, IsOptional, IsIn, MinLength, Matches } from 'class-validator';
+import {
+  IsEmail,
+  IsString,
+  IsOptional,
+  IsIn,
+  MinLength,
+  Matches,
+  ValidateIf,
+  IsNotEmpty,
+} from 'class-validator';
 import { RoleType } from '../../../../../apps/auth/src/domain/types/role.type';
 
 export class SignUpReqDto {
@@ -18,7 +27,12 @@ export class SignUpReqDto {
   @IsString()
   confirmPassword: string;
 
-  @IsOptional()
+  @IsNotEmpty()
   @IsIn(['USER', 'OPERATOR', 'AUDITOR', 'ADMIN'])
-  role?: RoleType;
+  role: RoleType;
+
+  @ValidateIf((o) => ['ADMIN', 'AUDITOR', 'OPERATOR'].includes(o.role))
+  @IsString()
+  @IsNotEmpty({ message: '고급 권한 등록을 위해 비밀키가 필요합니다.' })
+  secretKey?: string;
 }
