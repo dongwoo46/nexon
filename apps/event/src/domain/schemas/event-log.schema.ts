@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema, Types } from 'mongoose';
+import { EventActionType } from '../types/event-action.type';
 
 export type EventLogDocument = EventLog & Document;
 
@@ -12,7 +13,7 @@ export class EventLog {
   event: Types.ObjectId;
 
   @Prop()
-  action: 'CLAIM_ATTEMPT' | 'CLAIM_SUCCESS' | 'CLAIM_FAILED' | 'CONDITION_EVALUATED';
+  action: EventActionType;
 
   @Prop()
   status: 'success' | 'failed';
