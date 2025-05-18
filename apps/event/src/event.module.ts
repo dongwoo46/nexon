@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { EventController } from './event.controller';
-import { EventService } from './event.service';
+import { EventService } from './application/event.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
+import { EventController } from './interfaces/controllers/event.controller';
 
 @Module({
   imports: [

@@ -12,6 +12,15 @@
         "tsConfigPath": "apps/auth/tsconfig.app.json"
       }
     },
+    "dto": {
+      "type": "library",
+      "root": "libs/dto",
+      "entryFile": "index",
+      "sourceRoot": "libs/dto/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/dto/tsconfig.lib.json"
+      }
+    },
     "event": {
       "type": "application",
       "root": "apps/event",
@@ -30,5 +39,8 @@
         "tsConfigPath": "apps/gateway/tsconfig.app.json"
       }
     }
+  },
+  "compilerOptions": {
+    "webpack": true
   }
 }

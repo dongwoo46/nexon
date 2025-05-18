@@ -2,8 +2,11 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
-import { AuthController } from './auth.controller';
-import { AuthService } from './auth.service';
+import { AuthService } from './application/auth.service';
+import { AuthController } from './interfaces/controllers/auth.controller';
+import { User, UserSchema } from './domain/schemas/user.schema';
+import { UserController } from './interfaces/controllers/user.controller';
+import { UserService } from './application/user.service';
 
 @Module({
   imports: [
@@ -15,6 +18,7 @@ import { AuthService } from './auth.service';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
@@ -25,7 +29,7 @@ import { AuthService } from './auth.service';
       }),
     }),
   ],
-  controllers: [AuthController],
-  providers: [AuthService],
+  controllers: [AuthController, UserController],
+  providers: [AuthService, UserService],
 })
 export class AuthModule {}

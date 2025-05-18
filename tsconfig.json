@@ -17,6 +17,10 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
-    "paths": {}
+    "paths": {
+      "@libs/dto": ["libs/dto/src"],
+      "@libs/constants": ["libs/constants"],
+      "@libs/dto/*": ["libs/dto/src/*"]
+    }
   }
 }
