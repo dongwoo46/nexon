@@ -1,0 +1,27 @@
+// apps/event/src/domain/schemas/reward-request.schema.ts
+
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document, Schema as MongooseSchema, Types } from 'mongoose';
+import { RewardStatusType } from '../types/reward-status.type';
+
+export type RewardRequestDocument = RewardRequest & Document;
+
+@Schema({ timestamps: true })
+export class RewardRequest {
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User', required: true })
+  user: Types.ObjectId; // 유저
+
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Event', required: true })
+  event: Types.ObjectId; // 이벤트
+
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Reward', required: true })
+  reward: Types.ObjectId; // 보상
+
+  @Prop({ default: 'pending' })
+  status: RewardStatusType; // 보상 요청 상태
+
+  @Prop()
+  content?: string; // 감사로그
+}
+
+export const RewardRequestSchema = SchemaFactory.createForClass(RewardRequest);
