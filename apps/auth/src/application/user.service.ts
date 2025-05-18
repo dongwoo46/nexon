@@ -18,6 +18,7 @@ export class UserService {
   /**
    * @param dto : 유저 회원가입 정보
    * @returns
+   * 회원가입 시 sms 인증, 이메일 인증 등 본인확인 인증으로 사용자 체크 필요
    */
   async createUser(dto: SignUpReqDto): Promise<SignUpResDto> {
     const exists = await this.userModel.findOne({ email: dto.email });
@@ -52,13 +53,12 @@ export class UserService {
     const newUser = await User.signUpUser(dto);
     const createdUser = new this.userModel(newUser);
     await createdUser.save();
-    return {
+
+    const response: SignUpResDto = {
       statusCode: HttpStatus.CREATED,
       message: '회원가입이 완료되었습니다.',
     };
-  }
 
-  async findByEmail(email: string): Promise<User | null> {
-    return this.userModel.findOne({ email });
+    return response;
   }
 }

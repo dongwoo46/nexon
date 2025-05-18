@@ -1,19 +1,19 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Schema as MongooseSchema, Types } from 'mongoose';
+import { Document, HydratedDocument, Schema as MongooseSchema, Types } from 'mongoose';
 import { ConditionType } from '../types/condition.type';
-import { ConditionOperator } from '../types/condtion-operator.type';
+import { ConditionOperatorType } from '../types/condtion-operator.type';
 
-export type EventConditionDocument = EventCondition & Document;
+export type EventConditionDocument = HydratedDocument<EventCondition>;
 
 @Schema({ timestamps: true })
 export class EventCondition {
   // 조건의 타입 (출석, 포인트, 로그인)
-  @Prop({ required: true })
+  @Prop({ required: true, type: String })
   type: ConditionType;
 
   // 비교 연산자 (equals, greaterThanOrEqual)
-  @Prop({ required: true })
-  operator: ConditionOperator;
+  @Prop({ required: true, type: String })
+  operator: ConditionOperatorType;
 
   // 비교값
   @Prop({ required: true })

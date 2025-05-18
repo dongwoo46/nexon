@@ -1,8 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Schema as MongooseSchema, Types } from 'mongoose';
+import { Document, HydratedDocument, Schema as MongooseSchema, Types } from 'mongoose';
 import { RewardStatusType } from '../types/reward-status.type';
 
-export type RewardRequestDocument = RewardRequest & Document;
+export type RewardRequestDocument = HydratedDocument<RewardRequest>;
 
 @Schema({ timestamps: true })
 export class RewardRequest {
@@ -15,7 +15,7 @@ export class RewardRequest {
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Reward', required: true })
   reward: Types.ObjectId; // 보상
 
-  @Prop({ default: 'pending' })
+  @Prop({ default: 'pending', type: String })
   status: RewardStatusType; // 보상 요청 상태
 
   @Prop()

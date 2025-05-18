@@ -1,9 +1,9 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Schema as MongooseSchema, Types } from 'mongoose';
+import { Document, HydratedDocument, Schema as MongooseSchema, Types } from 'mongoose';
 import { EventType } from '../types/event.type';
 import { EventStatus } from '../types/event-status.type';
 
-export type EventDocument = Event & Document;
+export type EventDocument = HydratedDocument<Event>;
 
 @Schema({ timestamps: true })
 export class Event {
@@ -16,7 +16,7 @@ export class Event {
   description?: string;
 
   // 이벤트 유형/타입
-  @Prop({ required: true })
+  @Prop({ required: true, type: String })
   type: EventType;
 
   // 이벤트 시작시간
@@ -28,7 +28,7 @@ export class Event {
   endAt: Date;
 
   // 이벤트 상태
-  @Prop({ default: 'active' })
+  @Prop({ default: 'active', type: String })
   status: EventStatus;
 
   // 이벤트 보상 리스트

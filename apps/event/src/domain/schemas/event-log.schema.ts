@@ -1,8 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Schema as MongooseSchema, Types } from 'mongoose';
+import { Document, HydratedDocument, Schema as MongooseSchema, Types } from 'mongoose';
 import { EventActionType } from '../types/event-action.type';
 
-export type EventLogDocument = EventLog & Document;
+export type EventLogDocument = HydratedDocument<EventLog>;
 
 @Schema({ timestamps: true })
 export class EventLog {
@@ -12,7 +12,7 @@ export class EventLog {
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Event' })
   event: Types.ObjectId;
 
-  @Prop()
+  @Prop({ type: String })
   action: EventActionType;
 
   @Prop()

@@ -34,9 +34,7 @@ export class AuthService {
     // 비밀번호 체크
     const isPasswordValid = await bcrypt.compare(dto.password, user.password);
     if (!isPasswordValid) {
-      throw new RpcException(
-        new UnauthorizedException('이메일 또는 비밀번호가 올바르지 않습니다.'),
-      );
+      throw new RpcException(new UnauthorizedException('비밀번호가 올바르지 않습니다.'));
     }
 
     const payload = {
@@ -48,10 +46,12 @@ export class AuthService {
 
     const accessToken = this.jwtService.sign(payload);
 
-    return {
+    const response: LoginResDto = {
       statusCode: HttpStatus.OK,
       message: '로그인 성공',
       accessToken,
     };
+
+    return response;
   }
 }
