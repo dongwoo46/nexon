@@ -22,7 +22,6 @@ import { AuthModule } from 'apps/auth/src/auth.module';
       dbName: 'maple',
       ssl: false,
     }),
-    // MongooseModule.forRoot('mongodb://localhost:27017/maple', { dbName: 'maple', ssl: false }),
     MongooseModule.forFeature([
       { name: Reward.name, schema: RewardSchema },
       { name: Item.name, schema: ItemSchema },

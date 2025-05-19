@@ -13,7 +13,7 @@ import { CreateRewardRequestDto, ResponseDto, UpdateRewardRequestPayloadDto } fr
 import { RewardRequestFilterDto } from '@libs/dto/event/request/reward-request-filter.dto';
 import { RewardRequestSummaryDto } from '@libs/dto/event/request/reward-request-summary.dto';
 import { RpcException } from '@nestjs/microservices';
-import { RewardRequestStatus } from '@libs/constants';
+import { RewardRequestStatus, RewardRequestStatusType } from '@libs/constants';
 import { ResponseIdDto } from '@libs/dto/event/response/response-id-dto.dto';
 import { EventService } from './event.service';
 import { User, UserDocument } from 'apps/auth/src/domain/schemas/user.schema';
@@ -186,7 +186,7 @@ export class RewardRequestService {
       id: r._id.toString(),
       eventName: r.event.name,
       rewards: r.rewards.map((reward) => reward.name),
-      status: r.status,
+      status: r.status as RewardRequestStatusType,
       content: r.content,
       createdAt: r.createdAt,
     }));

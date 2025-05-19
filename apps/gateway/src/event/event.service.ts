@@ -14,12 +14,14 @@ import { EvaluateEventConditionDto } from '@libs/dto/event/request/evaluate-even
 import { EventFilterDto } from '@libs/dto/event/request/event-filter.dto';
 import { RewardRequestFilterDto } from '@libs/dto/event/request/reward-request-filter.dto';
 import { ResponseIdDto } from '@libs/dto/event/response/response-id-dto.dto';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class EventGatewayService {
+  private readonly logger = new Logger(EventGatewayService.name);
+
   constructor(@Inject('EVENT_SERVICE') private readonly eventClient: ClientProxy) {}
 
   //아이템 생성

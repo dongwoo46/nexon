@@ -30,7 +30,7 @@ import { EventGatewayModule } from './event/event.module';
       // app 모듈 인스턴스르 만들때마다 애플리케이션에 들어오는 모든 요청을 이 클래스의 인스턴스를 이용해 처리
       useValue: new ValidationPipe({
         whitelist: false,
-        transform: false, // dto에 정의된 필드 유형이 일치하지 않으면 자동으로 타입변환 수행
+        transform: true, // dto에 정의된 필드 유형이 일치하지 않으면 자동으로 타입변환 수행
         transformOptions: {
           enableImplicitConversion: false, // 문자열에서 숫자 불리언 또는 배열로 암시적변환
         },

@@ -4,6 +4,7 @@ import {
   HttpStatus,
   Injectable,
   InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Item, ItemDocument } from '../domain/schemas/item.schema';
@@ -13,6 +14,8 @@ import { MaxItemCountByGrade } from '@libs/constants';
 
 @Injectable()
 export class ItemService {
+  private readonly logger = new Logger(ItemService.name);
+
   constructor(
     @InjectModel(Item.name)
     private readonly itemModel: Model<ItemDocument>,

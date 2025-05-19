@@ -27,6 +27,8 @@ import { RewardService } from './reward.service';
 import { UserDocument } from 'apps/auth/src/domain/schemas/user.schema';
 import { EvaluateEventConditionDto } from '@libs/dto/event/request/evaluate-event-condition.dto';
 import { UserService } from 'apps/auth/src/application/user.service';
+import { plainToInstance } from 'class-transformer';
+import { validateOrReject } from 'class-validator';
 
 @Injectable()
 export class EventService {
@@ -39,7 +41,10 @@ export class EventService {
     private readonly userService: UserService,
   ) {}
 
-  async createEvent(dto: CreateEventDto): Promise<ResponseDto> {
+  async createEvent(rawDto: CreateEventDto): Promise<ResponseDto> {
+    const dto = plainToInstance(CreateEventDto, rawDto);
+    await validateOrReject(dto);
+
     const now = dayjs();
     const startAt = dayjs(dto.startAt);
     const endAt = dayjs(dto.endAt);

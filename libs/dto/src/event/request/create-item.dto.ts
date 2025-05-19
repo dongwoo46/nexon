@@ -8,6 +8,7 @@ import {
   IsDefined,
   IsIn,
   IsEnum,
+  IsDateString,
 } from 'class-validator';
 import {
   ItemType,
@@ -17,6 +18,7 @@ import {
   EventConst,
   EventType,
 } from '@libs/constants';
+import { Type } from 'class-transformer';
 
 export class CreateItemDto {
   @IsNotEmpty()
@@ -52,5 +54,6 @@ export class CreateItemDto {
 
   @IsOptional()
   @IsDate()
+  @Type(() => Date)
   expiresAt?: Date;
 }

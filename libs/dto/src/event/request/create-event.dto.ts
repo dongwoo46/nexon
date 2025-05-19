@@ -1,5 +1,6 @@
 import {
   IsArray,
+  IsDate,
   IsDateString,
   IsEnum,
   IsIn,
@@ -11,6 +12,7 @@ import {
 import { EventConst, EventType } from '@libs/constants/event.constant';
 import { EventStatus, EventStatusType } from '@libs/constants/event-status.constant';
 import { Condition, ConditionType } from '@libs/constants';
+import { Type } from 'class-transformer';
 
 export class CreateEventDto {
   @IsString()
@@ -26,10 +28,14 @@ export class CreateEventDto {
   @IsEnum(EventStatus)
   status: EventStatusType;
 
-  @IsDateString()
+  @IsOptional()
+  @IsDate()
+  @Type(() => Date)
   startAt: Date;
 
-  @IsDateString()
+  @IsOptional()
+  @IsDate()
+  @Type(() => Date)
   endAt: Date;
 
   @IsArray()

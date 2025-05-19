@@ -9,6 +9,7 @@ import {
   Query,
   Param,
   Patch,
+  Logger,
 } from '@nestjs/common';
 import { EventGatewayService } from './event.service';
 import { Roles } from '../common/decorators/role.decorator';
@@ -39,6 +40,8 @@ export interface UserPayload {
 
 @Controller()
 export class EventGatewayController {
+  private readonly logger = new Logger(EventGatewayController.name);
+
   constructor(private readonly eventService: EventGatewayService) {}
 
   // 아이템 생성
@@ -46,6 +49,7 @@ export class EventGatewayController {
   @Roles(Role.ADMIN, Role.OPERATOR)
   @Post('item/v1')
   async createItem(@Body() dto: CreateItemDto): Promise<ResponseDto> {
+    this.logger.log('아이템생성');
     return this.eventService.createItem(dto);
   }
 
