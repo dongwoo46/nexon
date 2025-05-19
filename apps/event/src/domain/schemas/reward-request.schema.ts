@@ -1,4 +1,4 @@
-import { RewardStatusType } from '@libs/constants';
+import { RewardRequestStatus, RewardRequestStatusType } from '@libs/constants';
 import { CreateRewardRequestDto } from '@libs/dto/event/request/create-reward-request.dto';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema, Types } from 'mongoose';
@@ -16,8 +16,12 @@ export class RewardRequest {
   @Prop([{ type: MongooseSchema.Types.ObjectId, ref: 'Reward' }])
   rewards: Types.ObjectId[]; // 보상
 
-  @Prop({ default: 'pending', type: String })
-  status: RewardStatusType; // 보상 요청 상태
+  @Prop({
+    type: String,
+    enum: Object.values(RewardRequestStatus),
+    default: RewardRequestStatus.PENDING,
+  })
+  status: RewardRequestStatusType; // 보상 상태
 
   @Prop()
   content?: string; // 감사로그
