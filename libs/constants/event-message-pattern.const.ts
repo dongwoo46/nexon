@@ -11,8 +11,8 @@ export const EventMessagePatternConst = {
   ITEM_DELETED: 'item.delete', // 아이템 삭제
   ITEM_READ: 'item.read', // 아이템 조회
 
-  // 이벤트 조건
-  EVENT_CONDITION_CREATE: 'event-condition.create',
+  // 보상
+  REWARD_CREATED: 'reward.create',
 } as const;
 
 export type EventMessagePattern =

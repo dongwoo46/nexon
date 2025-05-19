@@ -1,3 +1,4 @@
+import { CreateRewardDto } from '@libs/dto';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema, Types } from 'mongoose';
 
@@ -5,8 +6,8 @@ export type RewardDocument = HydratedDocument<Reward>;
 
 @Schema({ timestamps: true })
 export class Reward {
-  // 이벤트 명
-  @Prop({ required: true })
+  // 보상명
+  @Prop({ required: true, unique: true })
   name: string;
 
   @Prop()
@@ -26,6 +27,18 @@ export class Reward {
     default: [],
   })
   items: { item: Types.ObjectId; quantity: number }[];
+
+  static createReward(dto: CreateRewardDto): Partial<Reward> {
+    return {
+      name: dto.name,
+      description: dto.description,
+      event: dto.event ? new Types.ObjectId(dto.event) : undefined,
+      items: (dto.items ?? []).map((i) => ({
+        item: new Types.ObjectId(i.item),
+        quantity: i.quantity,
+      })),
+    };
+  }
 }
 
 export const RewardSchema = SchemaFactory.createForClass(Reward);

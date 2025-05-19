@@ -12,5 +12,5 @@ export * from './user-status.constant';
 export * from './acquire-limit.constant';
 export * from './item-grade.constant';
 export * from './item.constant';
-export * from './item-quantity-limit.constant';
 export * from './max-item-count.constant';
+export * from './event-status.constant';

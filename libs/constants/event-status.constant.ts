@@ -4,4 +4,4 @@ export const EventStatus = {
   CLOSED: 'closed', // 종료된 이벤트
 } as const;
 
-export type EventStatus = (typeof EventStatus)[keyof typeof EventStatus];
+export type EventStatusType = (typeof EventStatus)[keyof typeof EventStatus];

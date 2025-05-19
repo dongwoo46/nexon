@@ -2,6 +2,7 @@ export * from './auth/request/signup-req.dto';
 export * from './auth/response/signup-res.dto';
 export * from './auth/request/login-req.dto';
 export * from './auth/response/login-res.dto';
-export * from './event/request/create-event-condtion-req.dto';
 export * from './event/response/response.dto';
 export * from './event/request/create-item.dto';
+export * from './event/request/reward-item.dto';
+export * from './event/request/create-event.dto';

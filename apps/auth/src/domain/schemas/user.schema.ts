@@ -58,7 +58,7 @@ export class User {
   receivedRewards: Types.ObjectId[];
 
   // 유저 별명
-  @Prop({ default: null })
+  @Prop({ default: null, unique: true })
   nickname?: string;
 
   static async signUpUser(dto: SignUpReqDto): Promise<Partial<User>> {

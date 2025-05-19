@@ -1,10 +1,12 @@
 export const Condition = {
-  ATTENDANCE: 'attendance',
-  CONTINUOUS_ATTENDANCE: 'continuousAttendance',
-  POINTS: 'points',
-  USED_POINTS: 'usedPoints',
-  ITEM_COLLECTED: 'itemCollected',
-  LOGIN_COUNT: 'loginCount',
+  LOGIN_COUNT_OVER_3: 'LOGIN_COUNT_OVER_3',
+  LOGIN_COUNT_OVER_7: 'LOGIN_COUNT_OVER_7',
+  ATTENDANCE_DAYS_3: 'ATTENDANCE_DAYS_3',
+  ATTENDANCE_DAYS_7: 'ATTENDANCE_DAYS_7',
+  POINTS_OVER_1000: 'POINTS_OVER_1000',
+  USED_POINTS_OVER_500: 'USED_POINTS_OVER_500',
+  ITEM_COLLECTED_5: 'ITEM_COLLECTED_5',
+  FRIEND_INVITE_3: 'FRIEND_INVITE_3',
 } as const;
 
 export type ConditionType = (typeof Condition)[keyof typeof Condition];
