@@ -7,8 +7,10 @@ import {
   IsNumber,
   Min,
   IsNotEmpty,
+  IsEnum,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { EventConst, EventType } from '@libs/constants';
 
 class RewardItemDto {
   @IsMongoId()
@@ -22,6 +24,10 @@ class RewardItemDto {
 export class CreateRewardDto {
   @IsString()
   name: string;
+
+  @IsNotEmpty()
+  @IsEnum(EventConst)
+  rewardKey: EventType;
 
   @IsOptional()
   @IsString()

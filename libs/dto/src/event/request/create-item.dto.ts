@@ -9,12 +9,19 @@ import {
   IsIn,
   IsEnum,
 } from 'class-validator';
-import { ItemType, ItemGradeType, ItemConst, ItemGrade } from '@libs/constants';
+import {
+  ItemType,
+  ItemGradeType,
+  ItemConst,
+  ItemGrade,
+  EventConst,
+  EventType,
+} from '@libs/constants';
 
 export class CreateItemDto {
-  @IsString()
   @IsNotEmpty()
-  itemKey: string;
+  @IsEnum(EventConst)
+  itemKey: EventType;
 
   @IsString()
   @IsNotEmpty()

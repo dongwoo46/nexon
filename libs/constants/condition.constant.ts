@@ -7,6 +7,7 @@ export const Condition = {
   USED_POINTS_OVER_500: 'USED_POINTS_OVER_500',
   ITEM_COLLECTED_5: 'ITEM_COLLECTED_5',
   FRIEND_INVITE_3: 'FRIEND_INVITE_3',
+  DAILY_LOGIN: 'DAILY_LOGIN',
 } as const;
 
 export type ConditionType = (typeof Condition)[keyof typeof Condition];

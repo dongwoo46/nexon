@@ -1,4 +1,11 @@
-import { ItemConst, ItemGrade, ItemGradeType, ItemType } from '@libs/constants';
+import {
+  EventConst,
+  EventType,
+  ItemConst,
+  ItemGrade,
+  ItemGradeType,
+  ItemType,
+} from '@libs/constants';
 import { AcquireLimit, AcquireLimitType } from '@libs/constants/acquire-limit.constant';
 import { CreateItemDto } from '@libs/dto';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
@@ -9,10 +16,14 @@ export type ItemDocument = HydratedDocument<Item>;
 @Schema({ timestamps: true })
 export class Item {
   @Prop({ required: true, unique: true })
-  itemKey: string;
-
-  @Prop({ required: true })
   name: string;
+
+  @Prop({
+    required: true,
+    type: String,
+    enum: Object.values(EventConst),
+  })
+  itemKey: EventType;
 
   @Prop()
   description?: string;

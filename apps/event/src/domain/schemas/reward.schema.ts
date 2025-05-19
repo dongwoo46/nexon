@@ -1,3 +1,4 @@
+import { EventConst, EventType } from '@libs/constants';
 import { CreateRewardDto } from '@libs/dto';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema, Types } from 'mongoose';
@@ -8,6 +9,13 @@ export type RewardDocument = HydratedDocument<Reward>;
 export class Reward {
   @Prop({ required: true, unique: true })
   name: string;
+
+  // 중복가능 - 이벤트 생성 시 rewardKey로 이벤트에 따른 보상 찾기
+  @Prop({
+    required: true,
+    enum: Object.values(EventConst),
+  })
+  rewardKey: EventType;
 
   @Prop()
   description?: string;
@@ -32,6 +40,7 @@ export class Reward {
       name: dto.name,
       description: dto.description,
       event: dto.event ? new Types.ObjectId(dto.event) : undefined,
+      rewardKey: dto.rewardKey,
       items: (dto.items ?? []).map((i) => ({
         item: new Types.ObjectId(i.item),
         quantity: i.quantity,

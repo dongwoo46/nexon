@@ -21,8 +21,8 @@ import { RpcException } from '@nestjs/microservices';
 import * as dayjs from 'dayjs';
 import { ResponseIdDto } from '@libs/dto/event/response/response-id-dto.dto';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { EventStatus } from '@libs/constants';
-import * as crypto from 'crypto';
+import { Condition, EventConst, EventStatus } from '@libs/constants';
+import { RewardService } from './reward.service';
 
 @Injectable()
 export class EventService {
@@ -31,6 +31,7 @@ export class EventService {
   constructor(
     @InjectModel(EventSchema.name)
     private readonly eventModel: Model<EventDocument>,
+    private readonly rewardService: RewardService,
   ) {}
 
   async createEvent(dto: CreateEventDto): Promise<ResponseDto> {
@@ -205,5 +206,31 @@ export class EventService {
     );
 
     this.logger.log(`${expiredEvents.length}개의 이벤트가 종료되었습니다`);
+  }
+
+  // daily event 생성
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  async createDailyEventIfNotExists(): Promise<void> {
+    const today = dayjs().format('YYYY-MM-DD');
+    const name = `일일 출석 이벤트 - ${today}`;
+
+    const existing = await this.eventModel.findOne({ name });
+    if (existing) return;
+
+    // 보상 조회 또는 생성
+    const reward = await this.rewardService.getDailyReward();
+
+    const event = new this.eventModel({
+      name,
+      description: '매일 참여하는 출석 이벤트입니다.',
+      type: EventConst.DAILY_ATTENDANCE,
+      startAt: dayjs().startOf('day').toDate(),
+      endAt: dayjs().endOf('day').toDate(),
+      status: EventStatus.ACTIVE,
+      rewards: [reward._id],
+      conditions: [Condition.DAILY_LOGIN],
+    });
+
+    await event.save();
   }
 }

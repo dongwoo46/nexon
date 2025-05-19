@@ -13,7 +13,6 @@ import { ItemController } from './interfaces/controllers/item.controller';
 import { RewardRequestController } from './interfaces/controllers/reward-request.controller';
 import { RewardController } from './interfaces/controllers/reward.controller';
 import { ScheduleModule } from '@nestjs/schedule';
-import { EventScheduleService } from './application/event-schedule.service';
 import { Event, EventSchema } from './domain/schemas/event.schema';
 import { RewardRequest, RewardRequestSchema } from './domain/schemas/reward-request.schema';
 import {
@@ -44,7 +43,6 @@ import {
     ItemService,
     RewardRequestService,
     RewardService,
-    EventScheduleService,
   ],
 })
 export class EventModule {}
