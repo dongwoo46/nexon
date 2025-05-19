@@ -3,7 +3,8 @@ export const EventMessagePatternConst = {
   EVENT_CREATED: 'event.create', // 운영자가 새로운 이벤트 생성
   EVENT_UPDATED: 'event.update', // 이벤트 수정
   EVENT_DELETED: 'event.delete', // 이벤트 삭제
-  EVENT_READ: 'event.read', // 이벤트 조회
+  EVENT_LIST: 'event.list',
+  EVENT_DETAIL: 'event.detail',
 
   // 아이템
   ITEM_CREATED: 'item.create', // 아이템 생성
@@ -13,6 +14,9 @@ export const EventMessagePatternConst = {
 
   // 보상
   REWARD_CREATED: 'reward.create',
+
+  // 보상요청
+  REWARD_REQUEST_CREATED: 'reward.request.create',
 } as const;
 
 export type EventMessagePattern =

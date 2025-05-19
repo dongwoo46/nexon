@@ -6,8 +6,10 @@ import {
   IsNumber,
   IsDate,
   IsDefined,
+  IsIn,
+  IsEnum,
 } from 'class-validator';
-import { ItemType, ItemGradeType, AcquireLimitType } from '@libs/constants';
+import { ItemType, ItemGradeType, ItemConst, ItemGrade } from '@libs/constants';
 
 export class CreateItemDto {
   @IsString()
@@ -18,12 +20,11 @@ export class CreateItemDto {
   @IsNotEmpty()
   name: string;
 
-  @IsString()
-  @IsNotEmpty()
+  @IsEnum(ItemConst)
   type: ItemType;
 
-  @IsString()
   @IsNotEmpty()
+  @IsEnum(ItemGrade)
   grade: ItemGradeType;
 
   @IsBoolean()

@@ -14,3 +14,5 @@ export * from './item-grade.constant';
 export * from './item.constant';
 export * from './max-item-count.constant';
 export * from './event-status.constant';
+export * from './user-status.constant';
+export * from './role.constant';

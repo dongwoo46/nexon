@@ -1,4 +1,4 @@
-export const Event = {
+export const EventConst = {
   ATTENDANCE: 'attendance', // 누적 출석 이벤트
   CONTINUOUS: 'continuous', // 연속 출석 이벤트
   POINT: 'point', // 포인트 사용 이벤트

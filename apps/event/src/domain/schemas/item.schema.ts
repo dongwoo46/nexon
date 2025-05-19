@@ -21,7 +21,11 @@ export class Item {
   imageUrl?: string;
 
   // 아이템의 종류 (쿠폰, 스킨 등)
-  @Prop({ required: true, type: String })
+  @Prop({
+    required: true,
+    type: String,
+    enum: Object.values(ItemConst),
+  })
   type: ItemType;
 
   // 아이템 효과 (예: 10% 할인)
@@ -37,7 +41,11 @@ export class Item {
   expiresAt?: Date;
 
   // 아이템 등급
-  @Prop({ required: true, type: String })
+  @Prop({
+    required: true,
+    type: String,
+    enum: Object.values(ItemGrade),
+  })
   grade: ItemGradeType;
 
   static createItem(dto: CreateItemDto): Partial<Item> {

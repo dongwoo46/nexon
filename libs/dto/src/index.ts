@@ -6,3 +6,6 @@ export * from './event/response/response.dto';
 export * from './event/request/create-item.dto';
 export * from './event/request/reward-item.dto';
 export * from './event/request/create-event.dto';
+export * from './event/request/create-reward-request.dto';
+export * from './event/response/event-detail-response.dto';
+export * from './event/response/event-list-response.dto';

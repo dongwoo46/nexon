@@ -24,7 +24,6 @@ export class ItemService {
    * @returns
    */
   async createItem(dto: CreateItemDto): Promise<ResponseDto> {
-    // 중복 체크
     const exists = await this.itemModel.exists({ itemKey: dto.itemKey });
     if (exists) {
       throw new ConflictException(`이미 존재하는 아이템입니다: ${dto.itemKey}`);
@@ -46,7 +45,6 @@ export class ItemService {
       }
     }
 
-    // 도메인 생성
     const newItem = Item.createItem(dto);
     const createdItem = new this.itemModel(newItem);
 

@@ -2,8 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema, Types } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import { SignUpReqDto } from '@libs/dto';
-import { RoleType } from '@libs/constants/role.constant';
-import { UserStatusType } from '@libs/constants/user-status.constant';
+import { Role, RoleType, UserStatus, UserStatusType } from '@libs/constants';
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -18,11 +17,19 @@ export class User {
   password: string;
 
   // admin: 관리자 / operator: 운영자 / auditor: 감사자 / user: 일반 유저
-  @Prop({ default: 'USER', type: String })
+  @Prop({
+    type: String,
+    enum: Object.values(Role),
+    default: Role.USER,
+  })
   role: RoleType;
 
   // 유저 상태 관리
-  @Prop({ default: 'active', type: String })
+  @Prop({
+    type: String,
+    enum: Object.values(UserStatus),
+    default: UserStatus.ACTIVE,
+  })
   status: UserStatusType;
 
   // 출석 날짜

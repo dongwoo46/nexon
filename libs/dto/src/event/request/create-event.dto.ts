@@ -4,10 +4,11 @@ import {
   IsEnum,
   IsIn,
   IsMongoId,
+  IsNotEmpty,
   IsOptional,
   IsString,
 } from 'class-validator';
-import { Event, EventType } from '@libs/constants/event.constant';
+import { EventConst, EventType } from '@libs/constants/event.constant';
 import { EventStatus, EventStatusType } from '@libs/constants/event-status.constant';
 import { Condition, ConditionType } from '@libs/constants';
 
@@ -19,10 +20,10 @@ export class CreateEventDto {
   @IsString()
   description?: string;
 
-  @IsEnum(Event)
+  @IsEnum(EventConst)
   type: EventType;
 
-  @IsIn(Object.values(EventStatus))
+  @IsEnum(EventStatus)
   status: EventStatusType;
 
   @IsDateString()
@@ -33,9 +34,11 @@ export class CreateEventDto {
 
   @IsArray()
   @IsMongoId({ each: true })
+  @IsNotEmpty()
   rewards: string[];
 
   @IsArray()
   @IsEnum(Condition, { each: true })
+  @IsNotEmpty()
   conditions: ConditionType[];
 }

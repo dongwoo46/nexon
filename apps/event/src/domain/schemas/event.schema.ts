@@ -1,6 +1,13 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema, Types } from 'mongoose';
-import { Condition, ConditionType, EventStatus, EventStatusType, EventType } from '@libs/constants';
+import {
+  Condition,
+  ConditionType,
+  EventConst,
+  EventStatus,
+  EventStatusType,
+  EventType,
+} from '@libs/constants';
 import { CreateEventDto } from '@libs/dto';
 
 export type EventDocument = HydratedDocument<Event>;
@@ -16,7 +23,11 @@ export class Event {
   description?: string;
 
   // 이벤트 유형/타입
-  @Prop({ required: true, type: String })
+  @Prop({
+    required: true,
+    type: String,
+    enum: Object.values(EventConst),
+  })
   type: EventType;
 
   // 이벤트 시작시간
@@ -28,7 +39,11 @@ export class Event {
   endAt: Date;
 
   // 이벤트 상태
-  @Prop({ default: EventStatus.ACTIVE, type: String })
+  @Prop({
+    type: String,
+    enum: Object.values(EventStatus),
+    default: EventStatus.ACTIVE,
+  })
   status: EventStatusType;
 
   // 이벤트 보상 리스트
