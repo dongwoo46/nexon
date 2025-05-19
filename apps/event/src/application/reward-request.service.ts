@@ -4,6 +4,7 @@ import {
   HttpStatus,
   NotFoundException,
   BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { Connection, Model, Types } from 'mongoose';
@@ -17,6 +18,8 @@ import { ResponseIdDto } from '@libs/dto/event/response/response-id-dto.dto';
 import { EventService } from './event.service';
 import { User, UserDocument } from 'apps/auth/src/domain/schemas/user.schema';
 import { UserService } from 'apps/auth/src/application/user.service';
+import { Cron, CronExpression } from '@nestjs/schedule';
+import dayjs from 'dayjs';
 
 type PopulatedRequest = {
   _id: Types.ObjectId;
@@ -29,6 +32,8 @@ type PopulatedRequest = {
 
 @Injectable()
 export class RewardRequestService {
+  private readonly logger = new Logger(RewardRequestService.name);
+
   constructor(
     @InjectModel(RewardRequest.name)
     private readonly rewardRequestModel: Model<RewardRequestDocument>,
@@ -39,26 +44,66 @@ export class RewardRequestService {
   ) {}
 
   async createRewardRequest(dto: CreateRewardRequestDto): Promise<ResponseDto> {
-    const exists = await this.rewardRequestModel.findOne({
-      user: dto.user,
-      event: dto.event,
-    });
+    const session = await this.connection.startSession();
+    session.startTransaction();
+    try {
+      const exists = await this.rewardRequestModel.findOne({
+        user: dto.user,
+        event: dto.event,
+      });
 
-    if (exists) {
-      throw new ConflictException('이미 요청된 보상입니다.');
+      if (exists) {
+        throw new ConflictException('이미 요청된 보상입니다.');
+      }
+
+      // 평가
+      const result = await this.eventService.evaluateEventCondition({
+        eventId: dto.event.toString(),
+        userId: dto.user.toString(),
+      });
+
+      if (result.passed) {
+        // 유저에 보상 추가
+        const user = await this.userService.findById(dto.user.toString());
+
+        if (!user) {
+          throw new NotFoundException(` 유저가 존재하지 않습니다.`);
+        }
+
+        for (const rewardId of dto.rewards) {
+          const rewardIdStr = rewardId.toString();
+          const now = new Date();
+
+          if (user.receivedRewards[rewardIdStr]) {
+            user.receivedRewards[rewardIdStr].quantity += 1;
+          } else {
+            user.receivedRewards[rewardIdStr] = {
+              quantity: 1,
+              acquiredAt: now,
+            };
+          }
+        }
+
+        await user.save({ session });
+        dto.status = RewardRequestStatus.SUCCESS;
+      }
+
+      const newRewardRequest = RewardRequest.createRewardRequest(dto);
+      const createdRewardRequest = new this.rewardRequestModel(newRewardRequest);
+      await createdRewardRequest.save();
+
+      const response: ResponseDto = {
+        statusCode: HttpStatus.CREATED,
+        message: '보상 요청이 성공적으로 생성되었습니다.',
+        data: createdRewardRequest._id.toString(),
+      };
+      return response;
+    } catch (err) {
+      await session.abortTransaction();
+      throw err;
+    } finally {
+      session.endSession();
     }
-
-    const newRewardRequest = RewardRequest.createRewardRequest(dto);
-    const createdRewardRequest = new this.rewardRequestModel(newRewardRequest);
-    await createdRewardRequest.save();
-
-    const response: ResponseDto = {
-      statusCode: HttpStatus.CREATED,
-      message: '보상 요청이 성공적으로 생성되었습니다.',
-      data: createdRewardRequest._id.toString(),
-    };
-
-    return response;
   }
 
   // 보상 요청 상태 및 내용 수정
@@ -67,7 +112,6 @@ export class RewardRequestService {
   ): Promise<ResponseIdDto> {
     const session = await this.connection.startSession();
     session.startTransaction();
-    const { status, ...safeDto } = dto;
 
     try {
       const rewardRequest = await this.rewardRequestModel.findById(dto.id).session(session);
@@ -181,5 +225,69 @@ export class RewardRequestService {
       message: '보상 요청 상세 조회 성공',
       data: result,
     };
+  }
+
+  // 매일 오전 6시 출근 전에 자동으로 보상 요청 상태가 fail, pending인 값들 조회하여 보상조건 체크후
+  // 성공시 보상 지급
+  @Cron(CronExpression.EVERY_DAY_AT_6AM)
+  async evaluatePendingRewardRequests(): Promise<void> {
+    const session = await this.connection.startSession();
+    session.startTransaction();
+
+    try {
+      const start = dayjs().subtract(1, 'day').hour(6).minute(0).second(0).millisecond(0).toDate(); // 어제 06:00
+      const end = dayjs().hour(6).minute(0).second(0).millisecond(0).toDate(); // 오늘 06:00
+
+      const pendingRequests = await this.rewardRequestModel
+        .find({
+          status: { $in: [RewardRequestStatus.PENDING, RewardRequestStatus.FAILED] },
+          createdAt: { $gte: start, $lt: end },
+        })
+        .session(session);
+
+      for (const request of pendingRequests) {
+        const result = await this.eventService.evaluateEventCondition({
+          eventId: request.event.toString(),
+          userId: request.user.toString(),
+        });
+
+        if (result.passed) {
+          const user = await this.userService.findById(request.user.toString());
+          if (!user) continue;
+
+          for (const rewardId of request.rewards) {
+            const rewardIdStr = rewardId.toString();
+            const now = new Date();
+
+            if (user.receivedRewards[rewardIdStr]) {
+              user.receivedRewards[rewardIdStr].quantity += 1;
+            } else {
+              user.receivedRewards[rewardIdStr] = {
+                quantity: 1,
+                acquiredAt: now,
+              };
+            }
+          }
+
+          request.status = RewardRequestStatus.SUCCESS;
+          request.content = '자동 평가 성공';
+          await user.save({ session });
+        } else {
+          request.status = RewardRequestStatus.FAILED;
+          request.content = result.message ?? '조건 미충족';
+        }
+
+        await request.save({ session });
+      }
+
+      await session.commitTransaction();
+      this.logger.log(`[자동보상] ${pendingRequests.length}건 평가 및 처리 완료`);
+    } catch (err) {
+      await session.abortTransaction();
+      this.logger.error('[자동보상 실패]', err);
+      throw err;
+    } finally {
+      session.endSession();
+    }
   }
 }

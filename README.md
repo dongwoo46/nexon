@@ -1,98 +1,204 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# 동작방법
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+1. Docker 컨테이너 실행
+   docker-compose up -d ps) 이미지가 있을 시 docker-compose up --build -d
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+2. MongoDB 컨테이너에 접속
+   docker exec -it mongodb mongosh
 
-## Description
+3. Replica Set 초기화 명령 실행(트랜잭션 사용 위해서)
+   Mongo Shell에서: rs.initiate()
+   성공 시:{ ok: 1, ... }
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+4. 상태 확인
+   rs.status()
+   stateStr: "PRIMARY" 가 나와야 트랜잭션 사용 가능
 
-## Project setup
+# 시스템 설계 및 구조
 
-```bash
-$ npm install
-```
+이번 프로젝트는 MSA 아키텍처를 고려하여, 각 도메인을 DDD 원칙에 따라 분리하였습니다.  
+대표적으로 `Auth`, `Event`를 독립적인 도메인으로 나누고, 각 도메인 내부에 Controller / Service / Schema 계층을 명확히 구분했습니다.
 
-## Compile and run the project
+- 도메인 내부 데이터 변경은 각 스키마 내 메서드를 통해 수행되도록 하여, 외부 서비스가 직접 데이터를 조작하지 않도록 설계했습니다.
+- DTO는 Gateway와 Microservice 간에 공통으로 사용되기 때문에 `libs` 디렉토리로 분리하여 공유 가능한 구조로 만들었습니다.
+- gateway에서는 RESTful API로 http서버를 통해 클라이언트에서 요청을 받고 event, auth에서는 TCP 통신을 통해 gateway에서 요청을 받는 방식으로 구현하였습니다.
 
-```bash
-# development
-$ npm run start
+## API 설계구조
 
-# watch mode
-$ npm run start:dev
+이번 프로젝트에서는 REST API와 MessagePattern(RPC)을 혼합하여 사용했습니다.
 
-# production mode
-$ npm run start:prod
-```
+- Gateway에서는 REST API를 사용하여 유저가 직관적으로 사용할 수 있는 HTTP 기반 인터페이스를 제공했습니다.  
+  예: `/auth/v1/login`, `/events/v1/:eventId/evaluate`
 
-## Run tests
+- 내부 서비스 간 통신은 MessagePattern(RPC)을 사용했습니다.  
+  예: Gateway → EventService로 조건 평가 요청 전송
 
-```bash
-# unit tests
-$ npm run test
+그 이유는 다음과 같습니다:
 
-# e2e tests
-$ npm run test:e2e
+1. 유저는 REST API를 더 익숙하게 사용하므로, 외부 인터페이스는 REST 기반으로 구성
+2. RPC 통신을 통해 모듈간 결합도를 낮추고, MSA로 구현하였습니다.
 
-# test coverage
-$ npm run test:cov
-```
+이렇게 설계하면 API 소비자(클라이언트)는 HTTP만 알면 되고,  
+내부 로직은 유연하고 구조적으로 깔끔하게 유지할 수 있습니다.
 
-## Deployment
+# 스키마 설계 이유
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+## 1. 인증 / 인가
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+- 인증/인가는 `User` 스키마 하나로 통합해서 관리하되,
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
+  - 회원가입 및 로그인 로직은 `AuthService` 에서,
+  - User의 CRUD는 `UserService` 에서 처리되도록 역할을 분리했습니다.
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+- `Roles` 데코레이터는 사용자의 권한(`ADMIN`, `USER` 등)에 따라 접근을 제한할 수 있도록 Gateway의 `RolesGuard`와 함께 사용됩니다.
 
-## Resources
+- `JwtAuthGuard`는 사용자가 로그인 상태인지 항상 체크하기 위해 Global Guard로 설정했습니다.
+  - 다만, 로그인 및 회원가입은 인증 없이 접근 가능해야 하므로, 이 때는 `@Public()` 데코레이터로 예외처리를 했습니다.
 
-Check out a few resources that may come in handy when working with NestJS:
+## 2. 유저 로그인 및 회원가입 시 고려한 점
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+### 출석 이벤트 & 친구 초대 이벤트 설계
 
-## Support
+- 제가 고려한 이벤트에는 **출석 이벤트(연속/누적)**, **친구 초대 이벤트**가 있습니다.
+- 친구 초대 이벤트는 초대받은 사용자가 회원가입 시 초대코드를 입력하면,  
+  초대한 사용자의 `inviteCount`가 증가하는 구조입니다.
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+#### 동시성 문제 해결 (트랜잭션)
 
-## Stay in touch
+- 이 경우 유저 A와 B가 동시에 회원가입을 진행하면,  
+  초대자의 `inviteCount`를 동시에 수정하게 됩니다.
+- 한 명만 성공하고 다른 하나가 실패할 경우 **데이터 무결성이 깨질 수 있기 때문에**,  
+  MongoDB의 **트랜잭션을 활용해** 하나라도 실패 시 전체를 롤백하는 구조로 처리했습니다.
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+### 로그인 시 출석 기록 처리
 
-## License
+- 유저 로그인 시에는 출석 정보를 기록하고,  
+  마지막 출석 날짜와 비교하여 **연속 출석 날짜**를 계산합니다.
+- 만약 마지막 출석이 오늘이 아니고, 하루 이상 차이가 나면  
+  연속 출석 카운트는 **1부터 다시 시작**되도록 처리하였습니다.
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+### 출석 자동 보상 방식 → 수동 요청 방식으로 변경한 이유
+
+- 초기에는 로그인 시 자동으로 출석 보상을 지급하는 방식으로 설계했지만,  
+  실제 출석 이벤트들은 대부분 **이벤트 페이지에서 수동으로 '출석하기' 버튼을 눌러야 보상이 지급**된다는 점을 떠올렸습니다.
+- 따라서 모든 이벤트는 **유저가 직접 보상 요청을 트리거했을 때** 보상을 지급하는 방식으로 변경했습니다.
+  - 이 방식은 더 명확한 UX를 제공하고, 이벤트 페이지에서 다양한 조건 검증 및 UI 피드백을 줄 수 있어 유연합니다.
+
+## 3. 이벤트 설계 방법
+
+이벤트 시스템은 설계 초기에 다양한 방향성을 검토했으며,  
+과제 목적과 확장성을 고려해 현재 구조로 결정하였습니다.
+
+---
+
+### 이벤트 조건을 스키마로 분리할지에 대한 고민
+
+처음에는 이벤트 성립 조건을 별도의 스키마로 정의하고,  
+이벤트와 조건을 매핑시키는 구조를 고려했습니다.
+
+- 장점: 조건의 재사용성, 확장성 확보
+- 단점: 매번 조건 스키마를 조회해야 하며 구현 난이도도 올라감
+
+현재 과제의 규모와 시간적 제한을 고려하여 이 방식은 제외하였고,  
+대신 이벤트 타입을 **상수** 로 정의한 뒤,  
+**보상 요청 시 해당 상수를 기준으로 분기 처리하여 조건을 평가**하도록 설계했습니다.
+
+---
+
+### 보상 요청 로그 (감사 로그) 처리
+
+모든 유저의 보상 요청 및 이벤트 결과를 **감사 로그 형식으로 기록**하는 구조도 고려했습니다.
+
+- 유저 행동 기반의 로그를 남기면, 추후 모니터링/통계 분석에 유리합니다.
+- 하지만 실시간 로그 저장 + 조회 기능은 과제 요구 범위를 초과한다고 판단했습니다.
+
+그래서 현재는 보상 요청 자체(`RewardRequest`)를 **로그 성격의 역할로 활용**하며,  
+보상 요청의 성공/실패, 상태 등을 기반으로 이벤트 처리 흐름을 추적할 수 있도록 구성했습니다.
+
+---
+
+### 아이템(Item) 스키마 도입
+
+초기에는 `Reward` 스키마만으로도 이벤트 보상 구성이 가능하다고 판단했습니다.  
+하지만 다음과 같은 확장 케이스를 고려해 `Item` 스키마를 도입했습니다:
+
+- 하나의 보상에 여러 아이템이 포함된 **랜덤박스 / 가챠** 구조
+- 보상의 구성 요소를 최소 단위인 아이템으로 분리하면,  
+  아이템 조합을 통해 다양한 보상 형태를 만들 수 있음
+
+따라서 설계는 다음과 같이 구성되었습니다:
+`Item` : 보상의 가장 작은 단위 (ex. 코인, 포션 등)
+`Reward` : 하나 이상의 Item을 포함하는 보상 객체
+`Event` : 특정 보상을 가지고 있는 이벤트 (조건 포함)
+`RewardRequest` : 유저가 특정 이벤트에 대해 보상을 요청한 기록 (로그 역할)
+
+### 요약
+
+- 조건은 enum 기반 상수로 처리하여 복잡도 최소화
+- `RewardRequest`를 통해 보상 흐름을 추적 가능하도록 설계
+- `Item → Reward → Event` 계층 구조를 통해 보상 확장성 확보
+
+## 4. 보상 요청과 이벤트 중복 제한 처리 방식
+
+일부 이벤트는 단발성 이벤트지만, 출석 이벤트처럼 **반복되거나 일일로 발생하는 이벤트**는  
+**동일한 유저가 같은 유형의 이벤트에 대해 여러 번 보상 요청을 해야 할 수 있습니다.**
+
+초기에는 `userId + eventId`를 복합 유니크 키로 설정하여  
+중복 요청을 막았지만, 이 구조에서는 **일일 출석 이벤트**가 정상 작동하지 않는 문제가 발생했습니다.
+
+### 해결 방안:
+
+- 복합 유니크 키는 그대로 유지하면서,
+- **매일 새로운 이벤트 인스턴스를 생성**하여 `eventId`가 달라지도록 했습니다.
+- 이벤트 이름, 보상은 동일하되, `createdAt`이 다르고 `eventId`도 다르기 때문에  
+  유저는 **매일 다른 이벤트에 대해 보상 요청**을 보낼 수 있게 됩니다.
+- rewardKey를 바탕으로 일일 이벤트에 맞는 가장 최신의 Reward를 가져와서 일일 이벤트 생성에 매핑시켰습니다.
+
+이 방식은 구조를 바꾸지 않으면서도 일일 반복 이벤트 처리를 자연스럽게 지원합니다.
+또한, 반복 이벤트를 관리하는 스케줄러 기반의 백엔드 로직과도 잘 맞아떨어집니다.
+
+## 5. 조건 검증 방식
+
+보상 요청을 평가할 때, 이벤트에 정의된 `conditions` 목록을 기반으로  
+**해당 유저가 각 조건을 충족했는지 하나씩 평가**합니다.
+
+- 모든 조건을 만족한 경우에만 보상이 지급되며, `RewardRequest.status`를 `SUCCESS`로 변경합니다.
+- 조건 타입은 상수로 정의되어 있어 각 조건에 대해 `evaluateEventCondition()` 내에서 분기 처리를 통해 검증합니다.
+
+### 성능 최적화 고려
+
+초기에는 `for` 루프를 사용해 순차적으로 조건을 평가하였으나,  
+추후에는 **`Promise.allSettled()`를 통해 조건을 병렬로 검증**하면  
+성능을 개선할 수 있다고 판단하였습니다.
+
+### 자동 보상 지급
+
+매일 오전 6시, 스케줄러를 통해 전날 오전 6시부터 당일 오전 6시까지(24시간 동안) 생성된 보상 요청 중
+PENDING 또는 FAILED 상태인 요청들을 대상으로 이벤트 조건을 자동 평가합니다.
+
+조건을 충족하는 경우, 해당 유저에게 자동으로 보상이 지급되며, 요청 상태는 SUCCESS로 업데이트됩니다.
+
+반면, 조건을 충족하지 못한 경우에는 상태를 그대로 유지하거나 FAILED로 갱신합니다.
+
+유저가 보상 요청을 직접 수행한 경우, 요청 당시 조건이 바로 충족되면 즉시 보상이 지급되도록 처리되어 있습니다.
+
+단, 운영자가 보상 설정을 수정하는 경우가 있으므로,
+이 자동 지급 로직은 정책 또는 기획 요구에 따라 선택적으로 비활성화할 수 있습니다.
+
+## 6. 확장성과 유지보수 고려
+
+### 타입 안전성
+
+- 스키마의 주요 필드(`status`, `role`, `conditionType` 등)는 모두 **enum 상수**로 정의하여,
+  **하드코딩으로 인한 오류를 방지**하고 타입 안전성을 유지하였습니다.
+
+### 도메인 계층 분리
+
+- 각 도메인은 DDD 기반으로 **Controller → Service → Schema** 구조를 따릅니다.
+- 인증/인가 로직, 이벤트 로직, 보상 지급 로직 등은 **서로 분리**되며,
+  하나의 서비스가 하나의 책임만 가지도록 구성하여 **SRP(단일 책임 원칙)** 을 적용했습니다.
+
+### 반복 가능성과 재사용성
+
+- 반복적인 이벤트, 다양한 조건 유형, 다양한 아이템 보상 등을 모두 고려하여  
+  **최대한 재사용 가능한 구조로 설계**했습니다.
