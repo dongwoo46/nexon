@@ -33,7 +33,6 @@ import { EventFilterDto } from '@libs/dto/event/request/event-filter.dto';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { RewardRequestFilterDto } from '@libs/dto/event/request/reward-request-filter.dto';
 import { ResponseIdDto } from '@libs/dto/event/response/response-id-dto.dto';
-import Info from './../../../../node_modules/luxon/src/info';
 
 export interface UserPayload {
   userId: string; // MongoDB ObjectId 문자열
@@ -52,7 +51,6 @@ export class EventGatewayController {
   @Roles(Role.ADMIN, Role.OPERATOR)
   @Post('item/v1')
   async createItem(@Body() dto: CreateItemDto): Promise<ResponseDto> {
-    this.logger.log('아이템생성');
     return this.eventService.createItem(dto);
   }
 

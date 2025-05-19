@@ -58,6 +58,8 @@ export class EventController {
   @MessagePattern(EventMessagePatternConst.EVENT_UPDATED)
   async updateEvent(@Payload() payload: UpdateEventPayloadDto): Promise<ResponseIdDto> {
     try {
+      await validateOrReject(plainToInstance(UpdateEventPayloadDto, payload));
+
       const { id, ...dto } = payload;
       return this.eventService.updateEvent(id, dto);
     } catch (err) {

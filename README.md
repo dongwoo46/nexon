@@ -1,5 +1,7 @@
 # 동작방법
 
+maple 폴더 내부에서 아래 실행 필요
+
 1. Docker 컨테이너 실행
    docker-compose up -d ps) 이미지가 있을 시 docker-compose up --build -d
 
