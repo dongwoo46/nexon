@@ -11,6 +11,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { EventConst, EventType } from '@libs/constants';
+import { RewardGrade, RewardGradeType } from '@libs/constants/reward-rate.constant';
 
 class RewardItemDto {
   @IsMongoId()
@@ -28,6 +29,10 @@ export class CreateRewardDto {
   @IsNotEmpty()
   @IsEnum(EventConst)
   rewardKey: EventType;
+
+  @IsNotEmpty()
+  @IsEnum(RewardGrade)
+  grade: RewardGradeType;
 
   @IsOptional()
   @IsString()
