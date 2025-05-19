@@ -4,6 +4,7 @@ import {
   HttpStatus,
   ForbiddenException,
   ConflictException,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -94,5 +95,13 @@ export class UserService {
 
       throw new RpcException(new BadRequestException(`회원가입 실패: ${error.message}`));
     }
+  }
+
+  async findById(userId: string): Promise<UserDocument> {
+    const user = await this.userModel.findById(userId);
+    if (!user) {
+      throw new NotFoundException('유저 정보가 존재하지 않습니다.');
+    }
+    return user;
   }
 }

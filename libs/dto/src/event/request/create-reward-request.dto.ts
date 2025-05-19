@@ -1,5 +1,13 @@
-import { IsMongoId, IsOptional, IsString, IsIn, IsNotEmpty, IsArray } from 'class-validator';
-import { RewardStatus, RewardStatusType } from '@libs/constants';
+import {
+  IsMongoId,
+  IsOptional,
+  IsString,
+  IsIn,
+  IsNotEmpty,
+  IsArray,
+  IsEnum,
+} from 'class-validator';
+import { RewardRequestStatus, RewardRequestStatusType } from '@libs/constants';
 
 export class CreateRewardRequestDto {
   @IsNotEmpty()
@@ -15,8 +23,8 @@ export class CreateRewardRequestDto {
   rewards: string[];
 
   @IsNotEmpty()
-  @IsIn(Object.values(RewardStatus))
-  status: RewardStatusType;
+  @IsEnum(RewardRequestStatus)
+  status: RewardRequestStatusType;
 
   @IsOptional()
   @IsString()

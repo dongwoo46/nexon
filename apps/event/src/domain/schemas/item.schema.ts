@@ -6,7 +6,6 @@ import {
   ItemGradeType,
   ItemType,
 } from '@libs/constants';
-import { AcquireLimit, AcquireLimitType } from '@libs/constants/acquire-limit.constant';
 import { CreateItemDto } from '@libs/dto';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';

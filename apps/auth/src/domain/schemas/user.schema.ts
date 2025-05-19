@@ -61,11 +61,14 @@ export class User {
 
   // 받은 보상 ID 배열
   @Prop({
-    type: [MongooseSchema.Types.ObjectId],
-    ref: 'Reward',
-    default: [],
+    type: Map,
+    of: {
+      quantity: { type: Number, default: 1 },
+      acquiredAt: { type: Date, default: () => new Date() },
+    },
+    default: {},
   })
-  receivedRewards: Types.ObjectId[];
+  receivedRewards: Record<string, { quantity: number; acquiredAt: Date }>;
 
   // 유저 별명
   @Prop({ default: null, unique: true })
@@ -82,7 +85,7 @@ export class User {
       continuousAttendanceCount: 0,
       points: 0,
       usedPoints: 0,
-      receivedRewards: [],
+      receivedRewards: {},
     };
   }
 }

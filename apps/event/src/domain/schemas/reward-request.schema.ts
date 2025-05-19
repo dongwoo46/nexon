@@ -1,4 +1,5 @@
 import { RewardRequestStatus, RewardRequestStatusType } from '@libs/constants';
+import { UpdateRewardRequestDto } from '@libs/dto';
 import { CreateRewardRequestDto } from '@libs/dto/event/request/create-reward-request.dto';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema, Types } from 'mongoose';
@@ -36,7 +37,15 @@ export class RewardRequest {
       rewards: dto.rewards.map((r) => new Types.ObjectId(r)),
       content: dto.content,
       status: dto.status ?? 'pending',
+      updatedAt: new Date(),
     };
+  }
+
+  updateRewardRequest(dto: UpdateRewardRequestDto) {
+    if (dto.status !== undefined) this.status = dto.status;
+    if (dto.content !== undefined) this.content = dto.content;
+    if (dto.rewards !== undefined) this.rewards = dto.rewards;
+    this.updatedAt = new Date();
   }
 }
 

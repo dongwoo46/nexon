@@ -5,6 +5,7 @@ export const EventMessagePatternConst = {
   EVENT_DELETED: 'event.delete', // 이벤트 삭제
   EVENT_LIST: 'event.list',
   EVENT_DETAIL: 'event.detail',
+  EVENT_EVALUATE_CONDITIONS: 'event.evaluate_conditions', // 이벤트 조건 평가
 
   // 아이템
   ITEM_CREATED: 'item.create', // 아이템 생성
@@ -20,6 +21,7 @@ export const EventMessagePatternConst = {
   REWARD_REQUEST_LIST_BY_USER: 'reward-request.user-list',
   REWARD_REQUEST_LIST_ALL: 'reward-request.admin-list',
   REWARD_REQUEST_DETAIL: 'reward-request.detail',
+  REWARD_REQUEST_UPDATE: 'reward-request.update',
 } as const;
 
 export type EventMessagePattern =

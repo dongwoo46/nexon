@@ -6,6 +6,8 @@ import { CreateRewardDto, ResponseDto } from '@libs/dto';
 import * as dayjs from 'dayjs';
 import { EventConst } from '@libs/constants';
 import { RpcException } from '@nestjs/microservices';
+import { UserDocument } from 'apps/auth/src/domain/schemas/user.schema';
+import { RewardGrade } from '@libs/constants/reward-rate.constant';
 
 @Injectable()
 export class RewardService {
@@ -14,9 +16,7 @@ export class RewardService {
   async createReward(dto: CreateRewardDto): Promise<ResponseDto> {
     const existing = await this.rewardModel.findOne({ name: dto.name }).exec();
     if (existing) {
-      throw new RpcException(
-        new ConflictException(`이미 동일한 이름${dto.name}의 보상이 존재합니다.`),
-      );
+      throw new ConflictException(`이미 동일한 이름${dto.name}의 보상이 존재합니다.`);
     }
 
     const newReward = Reward.createReward(dto);
@@ -37,11 +37,23 @@ export class RewardService {
       .lean();
 
     if (!reward) {
-      throw new RpcException(
-        new NotFoundException('DAILY_ATTENDANCE에 해당하는 보상이 존재하지 않습니다.'),
-      );
+      throw new NotFoundException('DAILY_ATTENDANCE에 해당하는 보상이 존재하지 않습니다.');
     }
 
     return reward;
+  }
+
+  // user가 받은 보상중 레전더리 확인
+  async hasAcquiredLegendaryReward(user: UserDocument): Promise<boolean> {
+    const rewardIds = Object.keys(user.receivedRewards); // rewardId 목록 추출
+
+    if (rewardIds.length === 0) return false;
+
+    const legendaryCount = await this.rewardModel.countDocuments({
+      _id: { $in: rewardIds },
+      grade: RewardGrade.LEGENDARY,
+    });
+
+    return legendaryCount > 0;
   }
 }

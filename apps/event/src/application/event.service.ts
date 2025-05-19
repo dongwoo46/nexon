@@ -9,6 +9,7 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import {
+  ConditionEvaluationResultDto,
   CreateEventDto,
   EventDetailResponseDto,
   EventListResponseDto,
@@ -21,8 +22,11 @@ import { RpcException } from '@nestjs/microservices';
 import * as dayjs from 'dayjs';
 import { ResponseIdDto } from '@libs/dto/event/response/response-id-dto.dto';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { Condition, EventConst, EventStatus } from '@libs/constants';
+import { Condition, ConditionType, EventConst, EventStatus } from '@libs/constants';
 import { RewardService } from './reward.service';
+import { UserDocument } from 'apps/auth/src/domain/schemas/user.schema';
+import { EvaluateEventConditionDto } from '@libs/dto/event/request/evaluate-event-condition.dto';
+import { UserService } from 'apps/auth/src/application/user.service';
 
 @Injectable()
 export class EventService {
@@ -32,6 +36,7 @@ export class EventService {
     @InjectModel(EventSchema.name)
     private readonly eventModel: Model<EventDocument>,
     private readonly rewardService: RewardService,
+    private readonly userService: UserService,
   ) {}
 
   async createEvent(dto: CreateEventDto): Promise<ResponseDto> {
@@ -50,7 +55,7 @@ export class EventService {
     const exists = await this.eventModel.findOne({ name: dto.name });
 
     if (exists) {
-      throw new RpcException(new ConflictException('동일한 이름의 이벤트가 존재합니다.'));
+      throw new ConflictException('동일한 이름의 이벤트가 존재합니다.');
     }
 
     const newEvent = EventSchema.createEvent(dto);
@@ -208,6 +213,116 @@ export class EventService {
     this.logger.log(`${expiredEvents.length}개의 이벤트가 종료되었습니다`);
   }
 
+  // 이벤트 조건 평가
+  async evaluateEventCondition(
+    dto: EvaluateEventConditionDto,
+  ): Promise<ConditionEvaluationResultDto> {
+    const event = await this.eventModel.findById(dto.eventId);
+    if (!event) {
+      throw new NotFoundException('이벤트 정보가 존재하지 않습니다.');
+    }
+    const user = await this.userService.findById(dto.userId);
+    if (!user) {
+      throw new NotFoundException('유저 정보가 존재하지 않습니다.');
+    }
+    for (const condition of event.conditions ?? []) {
+      const passed = await this.evaluateCondition(user, condition);
+
+      if (!passed) {
+        return {
+          condition,
+          passed: false,
+          message: `${condition} 조건을 충족하지 못했습니다.`,
+        };
+      }
+    }
+
+    return {
+      passed: true,
+    };
+  }
+
+  private async evaluateCondition(user: UserDocument, condition: ConditionType): Promise<boolean> {
+    switch (condition) {
+      // 출석 관련
+      case Condition.ATTENDANCE_DAYS_7:
+        return await this.checkTotalDays(user, 7);
+
+      case Condition.ATTENDANCE_DAYS_30:
+        return await this.checkTotalDays(user, 30);
+
+      case Condition.CONSECUTIVE_DAYS_7:
+        return await this.checkConsecutiveDays(user, 7);
+
+      case Condition.CONSECUTIVE_DAYS_14:
+        return await this.checkConsecutiveDays(user, 14);
+
+      case Condition.DAILY_ATTENDANCE:
+        return await this.checkTodayLogin(user);
+
+      // 포인트 사용
+      case Condition.USED_POINTS_OVER_500:
+        return await this.checkUsedPoints(user, 500);
+
+      case Condition.REWARD_LEGENDARY_ACQUIRED:
+        return await this.checkLegendaryRewardAcquired(user);
+
+      // 친구 초대
+      case Condition.FRIEND_INVITE_OVER_10:
+        return await this.checkInvitedCount(user, 10); // 10명 이상 초대했는지
+
+      // 친구 초대
+      case Condition.FRIEND_INVITE_OVER_30:
+        return await this.checkInvitedCount(user, 30); // 30명 이상 초대했는지
+
+      // 리워드 획득
+      case Condition.REWARD_COUNT_OVER_10:
+        return await this.checkRewardCount(user, 10);
+
+      default:
+        return false;
+    }
+  }
+
+  // 누적 일수가 일정 수를 넘었을때 보상
+  private async checkTotalDays(user: UserDocument, minDays: number): Promise<boolean> {
+    return user.attendanceDates.length >= minDays;
+  }
+
+  // 연속 일수가 일정 수를 넘었을 때 보상
+  private async checkConsecutiveDays(user: UserDocument, minDays: number): Promise<boolean> {
+    return user.continuousAttendanceCount >= minDays;
+  }
+
+  // 유저가 오늘 접속했을 때
+  private async checkTodayLogin(user: UserDocument): Promise<boolean> {
+    const today = dayjs().format('YYYY-MM-DD');
+    return user.attendanceDates.includes(today);
+  }
+
+  // 유저 사용 포인트가 특정 값을 넘었을 떄
+  private async checkUsedPoints(user: UserDocument, minPoints: number): Promise<boolean> {
+    return user.usedPoints >= minPoints;
+  }
+
+  // 유저가 레전더리 보상을 가지고 있을 때
+  private async checkLegendaryRewardAcquired(user: UserDocument): Promise<boolean> {
+    return await this.rewardService.hasAcquiredLegendaryReward(user);
+  }
+
+  private async checkInvitedCount(user: UserDocument, minCount: number): Promise<boolean> {
+    return user.inviteCount >= minCount;
+  }
+
+  private async checkRewardCount(user: UserDocument, minCount: number): Promise<boolean> {
+    const totalReceived = Object.values(user.receivedRewards).reduce(
+      (sum, reward) => sum + reward.quantity,
+      0,
+    );
+
+    return totalReceived >= minCount;
+  }
+
   // daily event 생성
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async createDailyEventIfNotExists(): Promise<void> {
@@ -228,7 +343,7 @@ export class EventService {
       endAt: dayjs().endOf('day').toDate(),
       status: EventStatus.ACTIVE,
       rewards: [reward._id],
-      conditions: [Condition.DAILY_LOGIN],
+      conditions: [Condition.DAILY_ATTENDANCE],
     });
 
     await event.save();

@@ -11,8 +11,7 @@ import { UserService } from './application/user.service';
 @Module({
   imports: [
     MongooseModule.forRoot(
-      // mongodb://username:password@ip:port/dbname
-      'mongodb://mongodb:27017/maple',
+      'mongodb://mongodb:27017/maple?replicaSet=rs0',
       // 'mongodb://localhost:27017/maple',
       { dbName: 'maple', ssl: false },
     ),
@@ -33,5 +32,6 @@ import { UserService } from './application/user.service';
   ],
   controllers: [AuthController, UserController],
   providers: [AuthService, UserService],
+  exports: [UserService],
 })
 export class AuthModule {}
