@@ -19,7 +19,7 @@ import {
 import { Event as EventSchema, EventDocument } from '../domain/schemas/event.schema'; // ✅ 이름 충돌 방지
 import { EventFilterDto } from '@libs/dto/event/request/event-filter.dto';
 import { RpcException } from '@nestjs/microservices';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import { ResponseIdDto } from '@libs/dto/event/response/response-id-dto.dto';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { Condition, ConditionType, EventConst, EventStatus } from '@libs/constants';

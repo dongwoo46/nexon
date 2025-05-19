@@ -9,7 +9,7 @@ import { RpcException } from '@nestjs/microservices';
 import { ConfigService } from '@nestjs/config';
 import { UserStatus } from '../../../../libs/constants/user-status.constant';
 import { v4 as uuidv4 } from 'uuid';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 
 @Injectable()
 export class AuthService {

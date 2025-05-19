@@ -3,7 +3,6 @@ import { Reward, RewardDocument } from '../domain/schemas/reward.schema';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { CreateRewardDto, ResponseDto } from '@libs/dto';
-import * as dayjs from 'dayjs';
 import { EventConst } from '@libs/constants';
 import { RpcException } from '@nestjs/microservices';
 import { UserDocument } from 'apps/auth/src/domain/schemas/user.schema';
