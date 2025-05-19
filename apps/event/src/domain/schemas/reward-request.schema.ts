@@ -22,6 +22,9 @@ export class RewardRequest {
   @Prop()
   content?: string; // 감사로그
 
+  createdAt?: Date;
+  updatedAt?: Date;
+
   static createRewardRequest(dto: CreateRewardRequestDto): Partial<RewardRequest> {
     return {
       user: new Types.ObjectId(dto.user),

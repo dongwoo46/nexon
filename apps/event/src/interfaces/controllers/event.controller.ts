@@ -7,8 +7,11 @@ import {
   EventDetailResponseDto,
   EventListResponseDto,
   ResponseDto,
+  UpdateEventDto,
+  UpdateEventPayloadDto,
 } from '@libs/dto';
 import { EventFilterDto } from '@libs/dto/event/request/event-filter.dto';
+import { ResponseIdDto } from '@libs/dto/event/response/response-id-dto.dto';
 
 @Controller()
 export class EventController {
@@ -30,5 +33,12 @@ export class EventController {
   @MessagePattern(EventMessagePatternConst.EVENT_DETAIL)
   async getEventById(@Payload() id: string): Promise<EventDetailResponseDto> {
     return await this.eventService.getEventById(id);
+  }
+
+  // 이벤트 수정
+  @MessagePattern(EventMessagePatternConst.EVENT_UPDATED)
+  async updateEvent(@Payload() payload: UpdateEventPayloadDto): Promise<ResponseIdDto> {
+    const { id, ...dto } = payload;
+    return this.eventService.updateEvent(id, dto);
   }
 }

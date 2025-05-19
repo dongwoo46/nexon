@@ -6,7 +6,6 @@ export type RewardDocument = HydratedDocument<Reward>;
 
 @Schema({ timestamps: true })
 export class Reward {
-  // 보상명
   @Prop({ required: true, unique: true })
   name: string;
 
@@ -15,7 +14,7 @@ export class Reward {
 
   // 연결된 이벤트
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Event', required: false })
-  event?: Types.ObjectId;
+  event: Types.ObjectId;
 
   @Prop({
     type: [

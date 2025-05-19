@@ -70,6 +70,17 @@ export class Event {
       conditions: dto.conditions ?? [],
     };
   }
+
+  updateEvent(dto: Partial<CreateEventDto>) {
+    if (dto.name !== undefined) this.name = dto.name;
+    if (dto.description !== undefined) this.description = dto.description;
+    if (dto.type !== undefined) this.type = dto.type;
+    if (dto.startAt !== undefined) this.startAt = new Date(dto.startAt);
+    if (dto.endAt !== undefined) this.endAt = new Date(dto.endAt);
+    if (dto.status !== undefined) this.status = dto.status;
+    if (dto.rewards !== undefined) this.rewards = dto.rewards.map((id) => new Types.ObjectId(id));
+    if (dto.conditions !== undefined) this.conditions = dto.conditions;
+  }
 }
 
 export const EventSchema = SchemaFactory.createForClass(Event);

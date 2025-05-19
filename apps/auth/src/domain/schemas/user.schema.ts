@@ -56,6 +56,9 @@ export class User {
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User', default: null })
   invitedBy?: Types.ObjectId;
 
+  @Prop({ default: 0 }) // 마지막 보상지급된 초대 단위
+  inviteRewardLevel: number;
+
   // 받은 보상 ID 배열
   @Prop({
     type: [MongooseSchema.Types.ObjectId],

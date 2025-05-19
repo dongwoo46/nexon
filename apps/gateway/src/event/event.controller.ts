@@ -1,4 +1,15 @@
-import { Controller, Post, Body, Get, UseGuards, Req, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  UseGuards,
+  Req,
+  HttpStatus,
+  Query,
+  Param,
+  Patch,
+} from '@nestjs/common';
 import { EventGatewayService } from './event.service';
 import { Roles } from '../common/decorators/role.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -8,9 +19,20 @@ import {
   CreateRewardDto,
   EventsResponseDto,
   ResponseDto,
+  UpdateEventDto,
+  UpdateEventPayloadDto,
 } from '@libs/dto';
 import { Role } from '@libs/constants';
 import { EventFilterDto } from '@libs/dto/event/request/event-filter.dto';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { RewardRequestFilterDto } from '@libs/dto/event/request/reward-request-filter.dto';
+import { ResponseIdDto } from '@libs/dto/event/response/response-id-dto.dto';
+
+export interface UserPayload {
+  _id: string; // MongoDB ObjectId 문자열
+  email: string;
+  role: 'USER' | 'ADMIN' | 'OPERATOR' | 'AUDITOR';
+}
 
 @Controller()
 export class EventGatewayController {
@@ -59,5 +81,35 @@ export class EventGatewayController {
   @Post('event/v1')
   async getEventDetail(@Body() dto: CreateEventDto): Promise<ResponseDto> {
     return this.eventService.createEvent(dto);
+  }
+
+  // 유저 본인 보상 요청 이력 조회
+  @Get('reward-request/v1/me')
+  async getMyRequests(@CurrentUser() user: UserPayload) {
+    return await this.eventService.getMyRewardRequests(user._id);
+  }
+
+  // 관리자 전체 요청 이력 조회
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN, Role.OPERATOR, Role.AUDITOR)
+  @Get('reward-request/v1')
+  async getAllRequests(@Query() query: RewardRequestFilterDto) {
+    return await this.eventService.getAllRewardRequests(query);
+  }
+
+  // 상세 조회
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN, Role.OPERATOR, Role.AUDITOR)
+  @Get('reward-request/v1/:id')
+  async getDetail(@Param('id') id: string) {
+    return await this.eventService.getRewardRequestDetail(id);
+  }
+
+  @Patch(':id')
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN, Role.OPERATOR)
+  async updateEvent(@Param('id') id: string, @Body() dto: UpdateEventDto): Promise<ResponseIdDto> {
+    const payload: UpdateEventPayloadDto = { id, ...dto };
+    return this.eventService.updateEvent(payload);
   }
 }

@@ -16,7 +16,10 @@ export const EventMessagePatternConst = {
   REWARD_CREATED: 'reward.create',
 
   // 보상요청
-  REWARD_REQUEST_CREATED: 'reward.request.create',
+  REWARD_REQUEST_CREATED: 'reward-request.create',
+  REWARD_REQUEST_LIST_BY_USER: 'reward-request.user-list',
+  REWARD_REQUEST_LIST_ALL: 'reward-request.admin-list',
+  REWARD_REQUEST_DETAIL: 'reward-request.detail',
 } as const;
 
 export type EventMessagePattern =

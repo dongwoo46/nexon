@@ -9,3 +9,4 @@ export * from './event/request/create-event.dto';
 export * from './event/request/create-reward-request.dto';
 export * from './event/response/event-detail-response.dto';
 export * from './event/response/event-list-response.dto';
+export * from './event/request/update-event.dto';
