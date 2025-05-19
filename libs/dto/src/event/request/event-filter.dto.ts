@@ -19,13 +19,13 @@ export class EventFilterDto {
   @IsEnum(EventStatus)
   status?: EventStatusType;
 
-  @Transform(({ value }) => Number(value) || 1)
+  @IsOptional()
+  @Transform(({ value }) => (value === undefined ? 1 : Number(value)))
   @IsInt()
-  @Min(1)
   page: number;
 
-  @Transform(({ value }) => Number(value) || 10)
+  @IsOptional()
+  @Transform(({ value }) => (value === undefined ? 10 : Number(value)))
   @IsInt()
-  @Min(1)
   limit: number;
 }

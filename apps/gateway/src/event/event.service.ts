@@ -3,6 +3,7 @@ import {
   ConditionEvaluationResultDto,
   CreateItemDto,
   CreateRewardDto,
+  CreateRewardRequestDto,
   EventDetailResponseDto,
   EventListResponseDto,
   ResponseDto,
@@ -46,6 +47,16 @@ export class EventGatewayService {
     return await firstValueFrom(
       this.eventClient.send<ResponseDto, CreateEventDto>(
         EventMessagePatternConst.EVENT_CREATED,
+        dto,
+      ),
+    );
+  }
+
+  // 보상 요청 생성
+  async createRewardRequest(dto: CreateRewardRequestDto): Promise<ResponseDto> {
+    return await firstValueFrom(
+      this.eventClient.send<ResponseDto, CreateRewardRequestDto>(
+        EventMessagePatternConst.REWARD_REQUEST_CREATED,
         dto,
       ),
     );
@@ -117,7 +128,7 @@ export class EventGatewayService {
   ): Promise<ResponseIdDto> {
     return await firstValueFrom(
       this.eventClient.send<ResponseIdDto, UpdateRewardRequestPayloadDto>(
-        EventMessagePatternConst.EVENT_UPDATED,
+        EventMessagePatternConst.REWARD_REQUEST_UPDATE,
         dto,
       ),
     );

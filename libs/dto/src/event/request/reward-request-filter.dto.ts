@@ -1,5 +1,6 @@
 import { RewardRequestStatus, RewardRequestStatusType } from '@libs/constants';
-import { IsOptional, IsMongoId, IsEnum } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import { IsOptional, IsMongoId, IsEnum, IsInt, Min } from 'class-validator';
 
 export class RewardRequestFilterDto {
   @IsOptional()
@@ -13,4 +14,14 @@ export class RewardRequestFilterDto {
   @IsOptional()
   @IsEnum(RewardRequestStatus)
   status?: RewardRequestStatusType;
+
+  @IsOptional()
+  @Transform(({ value }) => (value === undefined ? 1 : Number(value)))
+  @IsInt()
+  page: number;
+
+  @IsOptional()
+  @Transform(({ value }) => (value === undefined ? 10 : Number(value)))
+  @IsInt()
+  limit: number;
 }

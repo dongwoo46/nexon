@@ -10,8 +10,6 @@ import {
 } from '@libs/constants';
 import { CreateEventDto } from '@libs/dto';
 
-export type EventDocument = HydratedDocument<Event>;
-
 @Schema({ timestamps: true })
 export class Event {
   // 이벤트 명
@@ -82,5 +80,17 @@ export class Event {
     if (dto.conditions !== undefined) this.conditions = dto.conditions;
   }
 }
-
+export type EventDocument = HydratedDocument<Event> & {
+  updateEvent: (dto: Partial<CreateEventDto>) => void;
+};
 export const EventSchema = SchemaFactory.createForClass(Event);
+EventSchema.methods.updateEvent = function (this: EventDocument, dto: Partial<CreateEventDto>) {
+  if (dto.name !== undefined) this.name = dto.name;
+  if (dto.description !== undefined) this.description = dto.description;
+  if (dto.type !== undefined) this.type = dto.type;
+  if (dto.startAt !== undefined) this.startAt = new Date(dto.startAt);
+  if (dto.endAt !== undefined) this.endAt = new Date(dto.endAt);
+  if (dto.status !== undefined) this.status = dto.status;
+  if (dto.rewards !== undefined) this.rewards = dto.rewards.map((id) => new Types.ObjectId(id));
+  if (dto.conditions !== undefined) this.conditions = dto.conditions;
+};

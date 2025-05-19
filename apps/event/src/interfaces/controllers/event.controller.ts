@@ -14,6 +14,8 @@ import {
 import { EventFilterDto } from '@libs/dto/event/request/event-filter.dto';
 import { ResponseIdDto } from '@libs/dto/event/response/response-id-dto.dto';
 import { EvaluateEventConditionDto } from '@libs/dto/event/request/evaluate-event-condition.dto';
+import { plainToInstance } from 'class-transformer';
+import { validateOrReject } from 'class-validator';
 
 @Controller()
 export class EventController {
@@ -31,8 +33,11 @@ export class EventController {
 
   // 이벤트 목록 조회
   @MessagePattern(EventMessagePatternConst.EVENT_LIST)
-  async getEvents(@Payload() filter: EventFilterDto): Promise<EventListResponseDto[]> {
+  async getEvents(@Payload() dto: EventFilterDto): Promise<EventListResponseDto[]> {
     try {
+      const filter = plainToInstance(EventFilterDto, dto);
+      await validateOrReject(filter);
+
       return await this.eventService.getEvents(filter);
     } catch (err) {
       throw new RpcException(err);

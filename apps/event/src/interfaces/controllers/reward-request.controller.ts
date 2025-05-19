@@ -1,4 +1,4 @@
-import { Controller, Get, HttpStatus } from '@nestjs/common';
+import { Controller, Get, HttpStatus, Logger } from '@nestjs/common';
 import { ItemService } from '../../application/item.service';
 import { MessagePattern, Payload, RpcException } from '@nestjs/microservices';
 import {
@@ -13,6 +13,8 @@ import { RewardRequestFilterDto } from '@libs/dto/event/request/reward-request-f
 import { ResponseIdDto } from '@libs/dto/event/response/response-id-dto.dto';
 @Controller()
 export class RewardRequestController {
+  private readonly logger = new Logger(RewardRequestController.name);
+
   constructor(private readonly rewardRequestService: RewardRequestService) {}
 
   // 보상 요청 생성
@@ -21,6 +23,7 @@ export class RewardRequestController {
     try {
       return await this.rewardRequestService.createRewardRequest(dto);
     } catch (err) {
+      this.logger.log(err);
       throw new RpcException(err);
     }
   }
@@ -36,6 +39,7 @@ export class RewardRequestController {
         data,
       };
     } catch (err) {
+      this.logger.log(err);
       throw new RpcException(err);
     }
   }
@@ -44,12 +48,8 @@ export class RewardRequestController {
   @MessagePattern(EventMessagePatternConst.REWARD_REQUEST_LIST_ALL)
   async getAllRewardRequests(@Payload() filter: RewardRequestFilterDto) {
     try {
-      const data = await this.rewardRequestService.getRewardRequestsByFilter(filter);
-      return {
-        statusCode: HttpStatus.OK,
-        message: '전체 보상 요청 이력 조회 성공',
-        data,
-      };
+      const result = await this.rewardRequestService.getRewardRequestsByFilter(filter);
+      return result;
     } catch (err) {
       throw new RpcException(err);
     }
@@ -59,12 +59,8 @@ export class RewardRequestController {
   @MessagePattern(EventMessagePatternConst.REWARD_REQUEST_DETAIL)
   async getRewardRequestDetail(@Payload() id: string) {
     try {
-      const data = await this.rewardRequestService.getRewardRequestDetail(id);
-      return {
-        statusCode: HttpStatus.OK,
-        message: '보상 요청 상세 조회 성공',
-        data,
-      };
+      const result = await this.rewardRequestService.getRewardRequestDetail(id);
+      return result;
     } catch (err) {
       throw new RpcException(err);
     }
@@ -79,6 +75,7 @@ export class RewardRequestController {
       const result = await this.rewardRequestService.updateRewardRequestWithEvaluateConditions(dto);
       return result;
     } catch (err) {
+      this.logger.log(err);
       throw new RpcException(err);
     }
   }

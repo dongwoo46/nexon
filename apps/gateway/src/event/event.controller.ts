@@ -19,6 +19,8 @@ import {
   CreateEventDto,
   CreateItemDto,
   CreateRewardDto,
+  CreateRewardRequestDto,
+  EventDetailResponseDto,
   EventsResponseDto,
   ResponseDto,
   UpdateEventDto,
@@ -31,9 +33,10 @@ import { EventFilterDto } from '@libs/dto/event/request/event-filter.dto';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { RewardRequestFilterDto } from '@libs/dto/event/request/reward-request-filter.dto';
 import { ResponseIdDto } from '@libs/dto/event/response/response-id-dto.dto';
+import Info from './../../../../node_modules/luxon/src/info';
 
 export interface UserPayload {
-  _id: string; // MongoDB ObjectId 문자열
+  userId: string; // MongoDB ObjectId 문자열
   email: string;
   role: 'USER' | 'ADMIN' | 'OPERATOR' | 'AUDITOR';
 }
@@ -69,11 +72,19 @@ export class EventGatewayController {
     return this.eventService.createEvent(dto);
   }
 
+  // 보상 요청 생성
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN, Role.USER)
+  @Post('reward-reuqest/v1')
+  async createRewardRequest(@Body() dto: CreateRewardRequestDto): Promise<ResponseDto> {
+    return this.eventService.createRewardRequest(dto);
+  }
+
   // 이벤트 리스트 조회
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN, Role.OPERATOR)
-  @Post('event/v1')
-  async getEvents(@Body() dto: EventFilterDto): Promise<EventsResponseDto> {
+  @Get('event/v1')
+  async getEvents(@Query() dto: EventFilterDto): Promise<EventsResponseDto> {
     const data = await this.eventService.getEventList(dto);
     return {
       statusCode: HttpStatus.OK,
@@ -85,15 +96,25 @@ export class EventGatewayController {
   // 이벤트 상세 조회
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN, Role.OPERATOR)
-  @Post('event/v1')
-  async getEventDetail(@Body() dto: CreateEventDto): Promise<ResponseDto> {
-    return this.eventService.createEvent(dto);
+  @Get('event/v1/:id')
+  async getEventDetail(@Param('id') id: string): Promise<EventDetailResponseDto> {
+    return this.eventService.getEventDetail(id);
   }
 
   // 유저 본인 보상 요청 이력 조회
   @Get('reward-request/v1/me')
-  async getMyRequests(@CurrentUser() user: UserPayload) {
-    return await this.eventService.getMyRewardRequests(user._id);
+  async getMyRewardRequests(@CurrentUser() user: UserPayload) {
+    this.logger.log(user);
+    return await this.eventService.getMyRewardRequests(user.userId);
+  }
+
+  // 보상요청 상세 조회
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN, Role.OPERATOR, Role.AUDITOR)
+  @Get('reward-request/v1/:id')
+  async getDetail(@Param('id') id: string) {
+    this.logger.log('보상요청 상세조회');
+    return await this.eventService.getRewardRequestDetail(id);
   }
 
   // 관리자 전체 보상 요청 이력 조회
@@ -102,14 +123,6 @@ export class EventGatewayController {
   @Get('reward-request/v1')
   async getAllRequests(@Query() query: RewardRequestFilterDto) {
     return await this.eventService.getAllRewardRequests(query);
-  }
-
-  // 보상요청 상세 조회
-  @UseGuards(RolesGuard)
-  @Roles(Role.ADMIN, Role.OPERATOR, Role.AUDITOR)
-  @Get('reward-request/v1/:id')
-  async getDetail(@Param('id') id: string) {
-    return await this.eventService.getRewardRequestDetail(id);
   }
 
   // 이벤트 정보 수정
@@ -130,15 +143,17 @@ export class EventGatewayController {
     @Body() dto: UpdateRewardRequestDto,
   ): Promise<ResponseIdDto> {
     const payload: UpdateRewardRequestPayloadDto = { id, ...dto };
+    this.logger.log(payload);
     return this.eventService.updateRewardRequestWithEvaluateConditions(payload);
   }
 
+  // 이벤트 조건 검증
   @Get(':eventId/evaluate')
   async evaluateConditions(
     @Param('eventId') eventId: string,
     @CurrentUser() user: UserPayload,
   ): Promise<ConditionEvaluationResultDto> {
-    const userId = user._id; // 👈 바로 여기서 꺼내면 됩니다
+    const userId = user.userId; // 👈 바로 여기서 꺼내면 됩니다
     return this.eventService.evaluateEventCondition({ userId, eventId });
   }
 }

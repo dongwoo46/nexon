@@ -8,4 +8,4 @@ export const EventConst = {
   REWARD_ACQUIRED: 'REWARD_ACQUIRED', // 특정 리워드 획득 시
 } as const;
 
-export type EventType = (typeof Event)[keyof typeof Event];
+export type EventType = (typeof EventConst)[keyof typeof EventConst];

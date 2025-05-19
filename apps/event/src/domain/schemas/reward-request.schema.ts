@@ -4,8 +4,6 @@ import { CreateRewardRequestDto } from '@libs/dto/event/request/create-reward-re
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema, Types } from 'mongoose';
 
-export type RewardRequestDocument = HydratedDocument<RewardRequest>;
-
 @Schema({ timestamps: true })
 export class RewardRequest {
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User', required: true })
@@ -40,15 +38,21 @@ export class RewardRequest {
       updatedAt: new Date(),
     };
   }
-
-  updateRewardRequest(dto: UpdateRewardRequestDto) {
-    if (dto.status !== undefined) this.status = dto.status;
-    if (dto.content !== undefined) this.content = dto.content;
-    if (dto.rewards !== undefined) this.rewards = dto.rewards;
-    this.updatedAt = new Date();
-  }
 }
 
+export type RewardRequestDocument = HydratedDocument<RewardRequest> & {
+  updateRewardRequest: (dto: UpdateRewardRequestDto) => void;
+};
+
 export const RewardRequestSchema = SchemaFactory.createForClass(RewardRequest);
+RewardRequestSchema.methods.updateRewardRequest = function (
+  this: RewardRequestDocument,
+  dto: UpdateRewardRequestDto,
+) {
+  this.status = dto.status;
+  if (dto.content !== undefined) this.content = dto.content;
+  if (dto.rewards !== undefined) this.rewards = dto.rewards;
+  this.updatedAt = new Date();
+};
 // 유저는 이벤트에 단 하나의 요청만 가능 중복 요청 불가
 RewardRequestSchema.index({ user: 1, event: 1 }, { unique: true });

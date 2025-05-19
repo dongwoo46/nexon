@@ -122,6 +122,7 @@ export class RewardRequestService {
       // 보상 요청 상태 반영
       rewardRequest.updateRewardRequest(dto);
 
+      // 성공으로 처리하기 위해서는 모든 이벤트 조건을 충족시켜야함
       if (dto.status === RewardRequestStatus.SUCCESS) {
         const result = await this.eventService.evaluateEventCondition({
           eventId: rewardRequest.event.toString(),
@@ -200,16 +201,31 @@ export class RewardRequestService {
     if (filter.event) query.event = filter.event;
     if (filter.status) query.status = filter.status;
 
-    const requests = await this.rewardRequestModel
-      .find(query)
-      .select(['_id', 'user', 'event', 'rewards', 'status', 'content', 'createdAt'])
-      .sort({ createdAt: -1 })
-      .lean();
+    // 페이지네이션 기본값 처리
+    const page = filter.page ?? 1;
+    const limit = filter.limit ?? 20;
+    const skip = (page - 1) * limit;
+
+    const [requests, total] = await Promise.all([
+      this.rewardRequestModel
+        .find(query)
+        .select(['_id', 'user', 'event', 'rewards', 'status', 'content', 'createdAt'])
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      this.rewardRequestModel.countDocuments(query),
+    ]);
 
     return {
       statusCode: HttpStatus.OK,
-      message: '보상 요청 목록 조회 성공',
-      data: requests,
+      message: '전체 보상 요청 이력 조회 성공',
+      data: {
+        total, // 전체 개수
+        page, // 현재 페이지
+        limit, // 페이지당 개수
+        requests, // 요청 목록
+      },
     };
   }
 
