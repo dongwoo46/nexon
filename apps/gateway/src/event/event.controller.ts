@@ -14,6 +14,7 @@ import { EventGatewayService } from './event.service';
 import { Roles } from '../common/decorators/role.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
 import {
+  ConditionEvaluationResultDto,
   CreateEventDto,
   CreateItemDto,
   CreateRewardDto,
@@ -21,6 +22,8 @@ import {
   ResponseDto,
   UpdateEventDto,
   UpdateEventPayloadDto,
+  UpdateRewardRequestDto,
+  UpdateRewardRequestPayloadDto,
 } from '@libs/dto';
 import { Role } from '@libs/constants';
 import { EventFilterDto } from '@libs/dto/event/request/event-filter.dto';
@@ -89,7 +92,7 @@ export class EventGatewayController {
     return await this.eventService.getMyRewardRequests(user._id);
   }
 
-  // 관리자 전체 요청 이력 조회
+  // 관리자 전체 보상 요청 이력 조회
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN, Role.OPERATOR, Role.AUDITOR)
   @Get('reward-request/v1')
@@ -97,7 +100,7 @@ export class EventGatewayController {
     return await this.eventService.getAllRewardRequests(query);
   }
 
-  // 상세 조회
+  // 보상요청 상세 조회
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN, Role.OPERATOR, Role.AUDITOR)
   @Get('reward-request/v1/:id')
@@ -105,11 +108,33 @@ export class EventGatewayController {
     return await this.eventService.getRewardRequestDetail(id);
   }
 
-  @Patch(':id')
+  // 이벤트 정보 수정
+  @Patch('event/v1/:id')
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN, Role.OPERATOR)
   async updateEvent(@Param('id') id: string, @Body() dto: UpdateEventDto): Promise<ResponseIdDto> {
     const payload: UpdateEventPayloadDto = { id, ...dto };
     return this.eventService.updateEvent(payload);
+  }
+
+  // 보상요청 수정
+  @Patch('reward-request/v1/:id')
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN, Role.OPERATOR)
+  async updateRewardRequestWithEvaluateConditions(
+    @Param('id') id: string,
+    @Body() dto: UpdateRewardRequestDto,
+  ): Promise<ResponseIdDto> {
+    const payload: UpdateRewardRequestPayloadDto = { id, ...dto };
+    return this.eventService.updateRewardRequestWithEvaluateConditions(payload);
+  }
+
+  @Get(':eventId/evaluate')
+  async evaluateConditions(
+    @Param('eventId') eventId: string,
+    @CurrentUser() user: UserPayload,
+  ): Promise<ConditionEvaluationResultDto> {
+    const userId = user._id; // 👈 바로 여기서 꺼내면 됩니다
+    return this.eventService.evaluateEventCondition({ userId, eventId });
   }
 }

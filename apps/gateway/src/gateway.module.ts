@@ -1,23 +1,21 @@
 import { Module, ValidationPipe } from '@nestjs/common';
-import { GatewayController } from './gateway.controller';
-import { GatewayService } from './gateway.service';
 import { AuthGatewayModule } from './auth/auth.module';
 import { APP_FILTER, APP_GUARD, APP_PIPE } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/passport/jwt-auth.guard';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { ConfigModule } from '@nestjs/config';
 import { RolesGuard } from './common/guards/roles.guard';
+import { EventGatewayModule } from './event/event.module';
 
 @Module({
   imports: [
     AuthGatewayModule,
+    EventGatewayModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),
   ],
-  controllers: [GatewayController],
   providers: [
-    GatewayService,
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,

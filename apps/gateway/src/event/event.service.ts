@@ -1,13 +1,16 @@
 import { EventMessagePatternConst } from '@libs/constants/event-message-pattern.const';
 import {
+  ConditionEvaluationResultDto,
   CreateItemDto,
   CreateRewardDto,
   EventDetailResponseDto,
   EventListResponseDto,
   ResponseDto,
   UpdateEventPayloadDto,
+  UpdateRewardRequestPayloadDto,
 } from '@libs/dto';
 import { CreateEventDto } from '@libs/dto/event/request/create-event.dto';
+import { EvaluateEventConditionDto } from '@libs/dto/event/request/evaluate-event-condition.dto';
 import { EventFilterDto } from '@libs/dto/event/request/event-filter.dto';
 import { RewardRequestFilterDto } from '@libs/dto/event/request/reward-request-filter.dto';
 import { ResponseIdDto } from '@libs/dto/event/response/response-id-dto.dto';
@@ -101,6 +104,30 @@ export class EventGatewayService {
     return await firstValueFrom(
       this.eventClient.send<ResponseIdDto, UpdateEventPayloadDto>(
         EventMessagePatternConst.EVENT_UPDATED,
+        dto,
+      ),
+    );
+  }
+
+  // 보상 요청 수정
+  async updateRewardRequestWithEvaluateConditions(
+    dto: UpdateRewardRequestPayloadDto,
+  ): Promise<ResponseIdDto> {
+    return await firstValueFrom(
+      this.eventClient.send<ResponseIdDto, UpdateRewardRequestPayloadDto>(
+        EventMessagePatternConst.EVENT_UPDATED,
+        dto,
+      ),
+    );
+  }
+
+  // 사용자 이벤트 조건 충족 여부 평가
+  async evaluateEventCondition(
+    dto: EvaluateEventConditionDto,
+  ): Promise<ConditionEvaluationResultDto> {
+    return await firstValueFrom(
+      this.eventClient.send<ConditionEvaluationResultDto, EvaluateEventConditionDto>(
+        EventMessagePatternConst.EVENT_EVALUATE_CONDITIONS,
         dto,
       ),
     );
